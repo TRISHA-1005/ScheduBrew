@@ -1,0 +1,80 @@
+.layout{display:grid;grid-template-columns:minmax(0,1.65fr) minmax(310px,0.9fr);gap:24px;align-items:start}
+.heading{margin:0 0 17px}.kicker{font-size:11px;font-weight:800;letter-spacing:1.3px;color:#d65e2c;margin:0 0 5px}.heading h1{margin:0;color:#0c1031;font-weight:850;font-size:clamp(26px,3vw,34px);line-height:1.15}.heading p{font-size:13px;color:#7a859a;margin:8px 0 0}
+.card{border:1px solid #e5e9ef;border-radius:15px;background:#fff;padding:22px;box-shadow:0 5px 18px #0c103109;margin-bottom:15px;color:#0c1031}
+.cardTitle{display:flex;gap:12px;align-items:start;margin-bottom:16px}.cardTitleIcon{width:29px;height:29px;color:#6b7990;flex-shrink:0}.cardTitle h2{font-size:15px;font-weight:800;margin:0 0 4px}.cardTitle p{margin:0;color:#8691a4;font-size:12px}
+.productRow{display:flex;align-items:center;gap:13px;padding:14px 0;border-bottom:1px solid #eff1f5}.productRow:last-child{border-bottom:0}.productImage{width:74px;height:74px;object-fit:cover;border-radius:10px;flex:none}.productText{flex:1;min-width:0}.productText h3{font-size:13px;margin:0 0 4px;font-weight:800}.productText small{color:#8b96a8;font-size:11px}.productText strong{display:block;margin-top:6px;font-size:13px;color:#ce5c2c}
+.stepper{display:flex;align-items:center;gap:10px}.stepper button{border:1px solid #e1e5eb;border-radius:8px;width:30px;height:30px;display:grid;place-items:center;background:#fff;cursor:pointer;color:#0c1031}.stepper button:hover{background:#fff1ea;border-color:#eab28f}.stepper span{font-weight:800;font-size:12px;min-width:13px;text-align:center}
+.summary{position:sticky;top:99px}.summaryItem{display:flex;align-items:center;gap:10px;padding:10px 0}.summaryItem img{object-fit:cover;width:44px;height:44px;flex:none;border-radius:9px}.summaryItem div{flex:1;min-width:0}.summaryItem b{font-size:12px;display:block;line-height:1.3}.summaryItem small{font-size:10px;color:#8a93a5}.summaryItem strong{font-size:11px;white-space:nowrap}
+.rule{height:1px;background:#e8ebf0;margin:14px 0}.summaryLine{display:flex;align-items:center;justify-content:space-between;gap:15px;color:#7b879b;font-size:12px;margin:12px 0}.summaryLine strong{color:#263451}.summaryTotal{display:flex;align-items:center;justify-content:space-between;gap:15px;font-size:15px;font-weight:800;color:#0c1031;margin:18px 0}.summaryTotal strong{color:#d9602a;font-size:21px}.primaryButton{width:100%;border:0;background:#e45e24;color:white;border-radius:9px;padding:14px 15px;display:inline-flex;align-items:center;justify-content:center;gap:8px;font-size:13px;font-weight:800;text-decoration:none;cursor:pointer;text-align:center}.primaryButton:hover{background:#be4a19}.primaryButton:disabled{background:#e3bbaa;cursor:not-allowed}.secondaryButton{border:1px solid #e1e5ec;background:white;border-radius:8px;padding:10px 12px;display:inline-flex;align-items:center;justify-content:center;gap:7px;text-decoration:none;font-size:12px;color:#4e5d77;cursor:pointer}.secondaryButton:hover{border-color:#e0a184;color:#c95a28}.muted{font-size:11px;color:#8793a6;text-align:center;line-height:1.5;margin:12px 0 0}.inlineActions{display:flex;gap:12px;flex-wrap:wrap;align-items:center}.inlineActions button{border:0;color:#ae4e31;background:transparent;font-size:12px;cursor:pointer}.inlineActions button:hover{text-decoration:underline}.statusNotice{background:#fff7ed;border:1px solid #f1d3bd;border-radius:10px;color:#9b572e;padding:12px 15px;font-size:12px;line-height:1.6;margin:0 0 16px}.emptyCard{padding:48px 22px;border:1px dashed #d4d9e3;background:white;border-radius:14px;text-align:center;color:#758198}.emptyCard svg{margin:auto;color:#d15e30}.emptyCard h2{font-size:19px;color:#111a3f}.emptyCard p{font-size:12px;max-width:330px;margin:9px auto 24px}.emptyCard a{max-width:260px;margin:auto}
+.twoCol{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.threeCol{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}.field{display:flex;flex-direction:column;gap:7px;margin:0 0 14px}.field label{font-weight:700;font-size:11px;color:#57657a}.field input,.field select,.field textarea{width:100%;min-width:0;border:1px solid #dfe4eb;background:#fff;border-radius:8px;padding:12px 11px;font-size:12px;color:#253451;font-family:inherit}.field textarea{min-height:64px;resize:vertical}.field input:focus,.field select:focus,.field textarea:focus{outline:2px solid #fae4d7;border-color:#db793e}.field input::placeholder{color:#abb4c1}.slotGrid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px;margin:8px 0 12px}.slot{border:1px solid #e0e4ea;background:white;color:#5f6f85;padding:9px 3px;font-size:11px;border-radius:7px;cursor:pointer;white-space:nowrap}.slot:hover{border-color:#d16a39;color:#bc582a}.slotSelected{background:#0c1031!important;color:white!important;border-color:#0c1031!important}.slotEmpty{font-size:11px;color:#bb692f;background:#fff5ed;padding:12px;border-radius:8px}.help{font-size:11px;color:#8a96a7;margin:8px 0 0;line-height:1.5}.paymentGrid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}.paymentOption{border:1px solid #e1e5ed;border-radius:9px;background:#fff;text-align:left;padding:12px 10px;min-height:75px;display:flex;flex-direction:column;justify-content:center;gap:5px;cursor:pointer}.paymentOption strong{font-size:12px;color:#283650}.paymentOption small{font-size:10px;color:#8d99a9;line-height:1.4}.paymentOption.selected{border:1.5px solid #de692f;background:#fff9f4}.disabledPayment{opacity:.75}.safe{border-radius:8px;background:#f1f5ff;padding:12px;font-size:11px;color:#6c7c97;display:flex;gap:8px;align-items:start;margin-top:14px}.safe svg{flex-shrink:0}.error{background:#fff3f1;border:1px solid #eeb5ad;padding:11px 13px;border-radius:9px;color:#a23223;font-size:12px;margin:12px 0}.benefits{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}.benefit{border:1px solid #e8ebf1;border-radius:11px;background:#fff;padding:14px 11px}.benefit svg{color:#d96b37}.benefit h3{margin:7px 0 3px;font-size:11px}.benefit p{margin:0;font-size:10px;color:#8a94a6;line-height:1.5}.confirmation{max-width:750px;margin:15px auto 0}.center{text-align:center}.confirmedIcon{display:flex;align-items:center;justify-content:center;border-radius:50%;width:75px;height:75px;margin:0 auto 16px;background:#eef7f1;color:#20844b}.keyValue{display:flex;justify-content:space-between;gap:18px;padding:9px 0;border-bottom:1px solid #edf0f4;font-size:12px}.keyValue span{color:#7b879b}.keyValue strong{color:#27304b;text-align:right}.pill{display:inline-flex;border-radius:30px;color:#a85a2e;background:#fff3eb;padding:7px 10px;font-size:11px;font-weight:700}
+@media(max-width:920px){.layout{grid-template-columns:minmax(0,1fr)}.summary{position:static}.slotGrid{grid-template-columns:repeat(4,minmax(0,1fr))}}
+@media(max-width:620px){.card{padding:16px}.twoCol,.threeCol{grid-template-columns:1fr}.slotGrid{grid-template-columns:repeat(3,minmax(0,1fr))}.paymentGrid{grid-template-columns:repeat(2,minmax(0,1fr))}.benefits{grid-template-columns:1fr 1fr 1fr}.productRow{flex-wrap:wrap}.productImage{width:60px;height:60px}.stepper{margin-left:auto}}
+@media(max-width:390px){.slotGrid{grid-template-columns:repeat(2,minmax(0,1fr))}.benefits{grid-template-columns:1fr}}
+
+
+/* Batch 3 checkout usability fix: keep the full right panel visible on desktop.
+   The left form scrolls independently. If the summary is unusually long, only
+   its content scrolls so the three information cards remain visible below. */
+@media (min-width: 921px) {
+  .checkoutLayout {
+    height: clamp(420px, calc(100dvh - 295px), 800px);
+    align-items: stretch;
+  }
+
+  .checkoutFormScroll {
+    min-width: 0;
+    min-height: 0;
+    padding: 2px 10px 5px 1px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    overscroll-behavior-y: contain;
+    scrollbar-gutter: stable;
+    scrollbar-width: thin;
+    scrollbar-color: #d5a48d #f3f5f9;
+  }
+
+  .checkoutFormScroll:focus-visible {
+    outline: 2px solid #d7612d;
+    outline-offset: 2px;
+    border-radius: 12px;
+  }
+
+  .checkoutSide {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    min-height: 0;
+    height: 100%;
+    gap: 0;
+  }
+
+  .checkoutSummary {
+    position: static;
+    flex: 0 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    overscroll-behavior-y: contain;
+    scrollbar-width: thin;
+    scrollbar-color: #d5a48d #f3f5f9;
+    margin-bottom: 12px;
+  }
+
+  .checkoutBenefits {
+    flex: 0 0 auto;
+  }
+
+  .checkoutFormScroll::-webkit-scrollbar,
+  .checkoutSummary::-webkit-scrollbar { width: 8px; }
+  .checkoutFormScroll::-webkit-scrollbar-thumb,
+  .checkoutSummary::-webkit-scrollbar-thumb { background: #d5a48d; border-radius: 20px; }
+  .checkoutFormScroll::-webkit-scrollbar-track,
+  .checkoutSummary::-webkit-scrollbar-track { background: #f3f5f9; border-radius: 20px; }
+}
+
+/* Tablets and phones use familiar page scrolling with the summary below. */
+@media (max-width: 920px) {
+  .checkoutLayout { height: auto; }
+  .checkoutFormScroll { overflow: visible; min-width: 0; }
+  .checkoutSide { height: auto; min-width: 0; }
+  .checkoutSummary { overflow: visible; }
+}

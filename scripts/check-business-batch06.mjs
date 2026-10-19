@@ -7,6 +7,13 @@ import { join } from "node:path";
 import { cwd, exit } from "node:process";
 
 const root = cwd();
+
+// Batch 7 replaces fixed example totals with calculated reporting.
+if (existsSync(join(root, "components/business/analytics-report.ts"))) {
+  console.log("Batch 7 reporting is installed. Running the current analytics checks.");
+  await import("./check-business-batch07.mjs");
+  process.exit(0);
+}
 const required = [
   "package.json",
   "app/business/analytics/page.tsx",

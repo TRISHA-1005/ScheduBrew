@@ -1,0 +1,22 @@
+PASS Inclusive date boundaries, source isolation and previous period
+PASS Only collected orders contribute value and average
+PASS Daily, weekly and monthly totals reconcile
+PASS Status filter applies to both periods and all report sections
+PASS Empty ranges and zero comparison denominators
+PASS Manila midnight boundaries independent of machine timezone
+PASS Range validation, leap days, year boundaries and maximum range
+PASS Sunday and Monday group into correct weeks; partial months preserved
+PASS Malformed, negative, fractional and duplicate records excluded
+PASS Pickup counts exclude cancellations and include Sunday
+PASS Repeat customers require stable identity
+PASS CSV escapes quotes, commas, newlines and spreadsheet formulas
+PASS Exports contain selected metadata and every filtered order
+PASS Local adapter keeps old orders undated and handles 12 AM / PM
+PASS Storage round trip preserves creation time and notifies reports
+PASS Sample history is deterministic and covers current and previous year selections
+PASS Authentication guard and Batch 7 integration files retained
+
+17 Batch 7 checks passed. These checks do not replace a full build or authenticated browser test.
+
+Additional local checks: scoped TypeScript passed; isolated UI and CSS bundle passed; existing Batch 3 and Batch 5 checks passed.
+Full project build and browser rendering were not completed. See BATCH_07_README.md for the exact limitations.

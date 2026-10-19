@@ -2,23 +2,13 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import {
-  BarChart3, CalendarClock, Check, TrendingUp,
-  ChevronDown, ClipboardList, Coffee, Download, LayoutDashboard, Menu, RotateCcw,
-  Settings, ShieldCheck, UsersRound, X,
-} from "lucide-react";
+import { BarChart3, CalendarClock, ChevronDown, ClipboardList, Coffee, Download, LayoutDashboard, Menu, Printer, RotateCcw, Settings, ShieldCheck, UsersRound, X } from "lucide-react";
 import { Logout } from "@/components/schedu/logout";
 import shell from "./dashboard.module.css";
 import styles from "./analytics.module.css";
-import {
-  ANALYTICS_PERIODS, BASE_ANALYTICS, PERIOD_FACTORS, PERIOD_TRENDS,
-  PICKUP_DAYS, PICKUP_HEATMAP, PICKUP_PERIODS, TOP_PRODUCTS, TREND_DATA,
-  TREND_VIEWS, csvCell, peso, readLocalOrderActivity,
-  type AnalyticsPeriod, type TrendView,
-} from "./analytics-demo-data";
-
-type LocalActivity = { count: number; revenue: number };
-type SelectedHeatCell = { day: string; time: string; level: number } | null;
+import { BUSINESS_CHANGED_EVENT, BUSINESS_ORDER_STORAGE } from "./demo-business-data";
+import { readLocalReportOrders } from "./analytics-local-data";
+import { REPORT_PERIODS, REPORT_STATUSES, REPORT_NOTE, STATUS_LABELS, TREND_VIEWS, WEEKDAYS, buildReport, createSampleHistory, manilaDate, pesoCents, presetRange, reportCsv, validateRange, type AnalyticsReport, type ReportPeriod, type ReportSource, type ReportStatus, type TrendView } from "./analytics-report";
 
 const nav = [
   { name: "Dashboard", icon: LayoutDashboard, href: "/business", batch: 1 },
@@ -26,141 +16,96 @@ const nav = [
   { name: "Pickup Schedule", icon: CalendarClock, href: "/business/pickup-schedule", batch: 3 },
   { name: "Menu", icon: Coffee, href: "/business/menu", batch: 4 },
   { name: "Customers", icon: UsersRound, href: "/business/customers", batch: 5 },
-  { name: "Analytics", icon: BarChart3, href: "/business/analytics", batch: 6 },
-  { name: "Settings", icon: Settings, href: "", batch: 7 },
+  { name: "Analytics and Reports", icon: BarChart3, href: "/business/analytics", batch: 6 },
+  { name: "Settings", icon: Settings, href: "", batch: 8 },
 ] as const;
-
-function avatarInitials(email: string): string {
-  const part = email.split("@")[0] || "SB";
-  return part.replace(/[^a-zA-Z]/g, "").slice(0, 2).toUpperCase() || "SB";
-}
-
-function chartPoints(values: number[]) {
-  const left = 42;
-  const right = 672;
-  const top = 24;
-  const bottom = 184;
-  const min = Math.min(...values);
-  const max = Math.max(...values);
-  const spread = max - min || 1;
-  return values.map((value, index) => ({
-    x: left + (values.length <= 1 ? 0 : index * ((right - left) / (values.length - 1))),
-    y: bottom - ((value - min) / spread) * (bottom - top),
-  }));
-}
-
-function safeDownloadReport(rows: Array<Array<string | number>>, filename: string) {
-  const csv = `\uFEFF${rows.map(row => row.map(csvCell).join(",")).join("\r\n")}`;
-  const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
-  const url = URL.createObjectURL(blob);
+const PAGE_SIZE = 10;
+const PICKUP_WINDOWS = [0, 4, 8, 12, 16, 20];
+function avatarInitials(email: string) { return (email.split("@")[0] || "SB").replace(/[^a-zA-Z]/g, "").slice(0, 2).toUpperCase() || "SB"; }
+function changeLabel(value: number | null) { return value === null ? "No previous value to compare" : `${value > 0 ? "+" : ""}${value.toFixed(1)}% vs previous period`; }
+function safeDownloadReport(csv: string, filename: string) {
+  const url = URL.createObjectURL(new Blob([csv], { type: "text/csv;charset=utf-8" }));
   const anchor = document.createElement("a");
-  anchor.href = url;
-  anchor.download = filename;
-  document.body.appendChild(anchor);
-  anchor.click();
-  anchor.remove();
-  window.setTimeout(() => URL.revokeObjectURL(url), 2000);
+  try { anchor.href = url; anchor.download = filename; document.body.appendChild(anchor); anchor.click(); }
+  finally { anchor.remove(); window.setTimeout(() => URL.revokeObjectURL(url), 2000); }
+}
+function TrendChart({ report, metric }: { report: AnalyticsReport; metric: "value" | "orders" }) {
+  const values = report.buckets.map(b => metric === "value" ? b.valueCents / 100 : b.orders);
+  const max = Math.max(1, ...values);
+  const points = values.map((value, index) => ({ x: values.length === 1 ? 360 : 65 + index * 595 / (values.length - 1), y: 190 - value / max * 155 }));
+  const ticks = new Set([0, Math.floor((values.length - 1) / 3), Math.floor(2 * (values.length - 1) / 3), values.length - 1]);
+  return <svg className={styles.chartSvg} viewBox="0 0 700 235" role="img" aria-label={`${metric === "value" ? "Collected order value in PHP" : "Order count"} from ${report.filters.start} through ${report.filters.end}. Exact values are in the trend table.`}>
+    {[0, 0.5, 1].map(t => <g key={t}><line x1="65" x2="660" y1={190 - 155 * t} y2={190 - 155 * t} stroke="#dce1e9" strokeDasharray="4 6" /><text x="56" y={194 - 155 * t} textAnchor="end" fontSize="11" fill="#53627b">{new Intl.NumberFormat("en-PH", { notation: "compact", maximumFractionDigits: 1 }).format(max * t)}</text></g>)}
+    <text x="65" y="17" fontSize="11" fill="#53627b">{metric === "value" ? "PHP" : "Orders"}</text>
+    <polyline points={points.map(p => `${p.x},${p.y}`).join(" ")} fill="none" stroke={metric === "value" ? "#d65e2d" : "#24345e"} strokeWidth="3" strokeLinejoin="round" />
+    {points.length <= 31 && points.map((p, i) => <circle key={i} cx={p.x} cy={p.y} r="3" fill="#d65e2d"><title>{report.buckets[i].start}: {metric === "value" ? pesoCents(values[i] * 100) : values[i]}</title></circle>)}
+    {[...ticks].filter(i => i >= 0).map(i => <text key={i} x={points[i].x} y="220" textAnchor="middle" fontSize="11" fill="#53627b">{report.buckets[i].start.slice(5)}</text>)}
+  </svg>;
 }
 
 export function BusinessAnalytics({ email }: { email: string }) {
   const [mobileMenu, setMobileMenu] = useState(false);
-  const [period, setPeriod] = useState<AnalyticsPeriod>("Last 30 days");
+  const [period, setPeriod] = useState<ReportPeriod>("Last 30 days");
   const [trendView, setTrendView] = useState<TrendView>("Daily");
-  const [selectedHeatCell, setSelectedHeatCell] = useState<SelectedHeatCell>(null);
-  const [activity, setActivity] = useState<LocalActivity>({ count: 0, revenue: 0 });
+  const [source, setSource] = useState<ReportSource>("sample");
+  const [status, setStatus] = useState<"all" | ReportStatus>("all");
+  const [customStart, setCustomStart] = useState("");
+  const [customEnd, setCustomEnd] = useState("");
+  const [local, setLocal] = useState<ReturnType<typeof readLocalReportOrders>>({ records: [], undated: 0 });
+  const [today, setToday] = useState("");
+  const [updatedAt, setUpdatedAt] = useState("");
   const [notice, setNotice] = useState("");
+  const [storageError, setStorageError] = useState("");
+  const [metric, setMetric] = useState<"value" | "orders">("value");
+  const [exportKind, setExportKind] = useState<"summary" | "orders" | "products">("summary");
+  const [selectedHeatCell, setSelectedHeatCell] = useState<{ day: number; hour: number } | null>(null);
+  const [page, setPage] = useState(0);
 
+  function refreshReport(announce = false) {
+    const now = new Date();
+    setToday(manilaDate(now)); setUpdatedAt(now.toISOString());
+    try {
+      const raw = window.localStorage.getItem(BUSINESS_ORDER_STORAGE);
+      if (raw !== null && !Array.isArray(JSON.parse(raw))) throw new Error("Invalid order storage");
+      setLocal(readLocalReportOrders()); setStorageError("");
+    } catch { setLocal({ records: [], undated: 0 }); setStorageError("Local order storage is unavailable or unreadable. Local reports cannot be loaded. Sample history remains available."); }
+    if (announce) setNotice("Report refreshed from the current data source.");
+  }
   useEffect(() => {
-    const refreshActivity = () => setActivity(readLocalOrderActivity());
-    refreshActivity();
-    window.addEventListener("storage", refreshActivity);
-    window.addEventListener("focus", refreshActivity);
-    return () => {
-      window.removeEventListener("storage", refreshActivity);
-      window.removeEventListener("focus", refreshActivity);
-    };
+    const load = () => refreshReport();
+    load();
+    window.addEventListener("storage", load); window.addEventListener("focus", load); window.addEventListener(BUSINESS_CHANGED_EVENT, load);
+    const timer = window.setInterval(load, 60_000);
+    return () => { window.removeEventListener("storage", load); window.removeEventListener("focus", load); window.removeEventListener(BUSINESS_CHANGED_EVENT, load); window.clearInterval(timer); };
   }, []);
-
   useEffect(() => {
     if (!mobileMenu) return;
-    const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") setMobileMenu(false);
-    };
-    window.addEventListener("keydown", onKeyDown);
-    return () => window.removeEventListener("keydown", onKeyDown);
+    const close = (e: KeyboardEvent) => { if (e.key === "Escape") setMobileMenu(false); };
+    window.addEventListener("keydown", close); return () => window.removeEventListener("keydown", close);
   }, [mobileMenu]);
 
-  const metrics = useMemo(() => {
-    const factor = PERIOD_FACTORS[period];
-    const trends = PERIOD_TRENDS[period];
-    const grossSales = Math.round(BASE_ANALYTICS.grossSales * factor + activity.revenue);
-    const orders = Math.max(1, Math.round(BASE_ANALYTICS.orders * factor + activity.count));
-    return {
-      grossSales,
-      orders,
-      averageOrderValue: grossSales / orders,
-      onTimeRate: trends.onTimeRate,
-      salesGrowth: trends.salesGrowth,
-      orderGrowth: trends.orderGrowth,
-      averageOrderDelta: trends.averageOrderDelta,
-    };
-  }, [period, activity]);
-
-  const series = TREND_DATA[trendView];
-  const revenuePoints = chartPoints(series.revenue);
-  const orderPoints = chartPoints(series.orders);
-  const revenuePolyline = revenuePoints.map(point => `${point.x},${point.y}`).join(" ");
-  const ordersPolyline = orderPoints.map(point => `${point.x},${point.y}`).join(" ");
-  const handle = email.split("@")[0]?.split(/[._-]/)[0] || "";
-  const ownerName = handle.length > 0 && handle.length <= 14
-    ? handle.charAt(0).toUpperCase() + handle.slice(1)
-    : "Partner";
-  const today = new Intl.DateTimeFormat("en-PH", {
-    year: "numeric", month: "short", day: "numeric", timeZone: "Asia/Manila",
-  }).format(new Date());
-
-  function refreshReport() {
-    setActivity(readLocalOrderActivity());
-    setNotice("Analytics refreshed using the latest browser based test orders.");
-  }
-
+  const range = useMemo(() => !today ? null : period === "Custom" ? { start: customStart, end: customEnd } : presetRange(period, today), [today, period, customStart, customEnd]);
+  const rangeError = range && today ? validateRange(range, today) : null;
+  const samples = useMemo(() => today ? createSampleHistory(today) : [], [today]);
+  const report = useMemo(() => range && !rangeError && !(source === "local" && storageError) ? buildReport(source === "sample" ? samples : local.records, { ...range, source, status, interval: trendView }) : null, [range, rangeError, source, storageError, samples, local.records, status, trendView]);
+  const totalPages = Math.max(1, Math.ceil((report?.orders.length || 0) / PAGE_SIZE));
+  const currentPage = Math.min(page, totalPages - 1);
+  const pageRows = report?.orders.slice(currentPage * PAGE_SIZE, (currentPage + 1) * PAGE_SIZE) || [];
+  const ownerName = email.split("@")[0] || "Partner";
+  const pickupCounts = report ? PICKUP_WINDOWS.map(hour => WEEKDAYS.map((_, day) => report.heatmap.slice(hour, hour + 4).reduce((sum, row) => sum + row[day], 0))) : [];
+  const maxPickup = Math.max(1, ...pickupCounts.flat());
+  function resetPage() { setPage(0); setSelectedHeatCell(null); setNotice(""); }
   function exportReport() {
-    const rows: Array<Array<string | number>> = [
-      ["ScheduBrew Analytics Report", "Illustrative frontend data"],
-      ["Report period", period],
-      ["Generated on", today],
-      ["Metric", "Value"],
-      ["Gross sales (PHP)", metrics.grossSales],
-      ["Orders", metrics.orders],
-      ["Average order value (PHP)", metrics.averageOrderValue.toFixed(2)],
-      ["On time rate (%)", metrics.onTimeRate],
-      ["Sales growth (%)", metrics.salesGrowth],
-      ["Order growth (%)", metrics.orderGrowth],
-      ["Customer retention (%)", BASE_ANALYTICS.customerRetention],
-      [],
-      ["Sales and orders trend", trendView],
-      ["Period", "Revenue (PHP)", "Orders"],
-      ...series.labels.map((label, index) => [label, series.revenue[index], series.orders[index]]),
-      [],
-      ["Top products", "Units sold", "Revenue (PHP)", "Trend (%)"],
-      ...TOP_PRODUCTS.map(product => [product.name, product.units, product.revenue, product.trend]),
-      [],
-      ["Peak pickup demand heatmap", "11 AM", "1 PM", "3 PM", "5 PM", "7 PM"],
-      ...PICKUP_DAYS.map((day, index) => [day, ...PICKUP_HEATMAP.map(row => row[index])]),
-      [],
-      ["Additional local test orders", activity.count],
-      ["Additional local test order value (PHP)", activity.revenue],
-      ["Data note", "Illustrative values only. Not connected to PostgreSQL or live payments."],
-    ];
-    const date = new Date().toISOString().slice(0, 10);
-    safeDownloadReport(rows, `schedu-brew-analytics-${date}.csv`);
-    setNotice("Analytics CSV report exported. The report contains illustrative figures and local test order adjustments.");
+    if (!report) return;
+    try {
+      safeDownloadReport(reportCsv(report, exportKind, new Date().toISOString(), source === "local" ? local.undated : 0), `schedubrew-${exportKind}-${source}-${range!.start}-${range!.end}.csv`);
+      setNotice(`${exportKind === "orders" ? "All filtered order rows" : exportKind === "products" ? "Collected product totals" : "Report summary"} exported as CSV.`);
+    } catch { setNotice("The download could not start. Please retry or use Print report."); }
   }
-
   return (
     <div className={`${shell.workspace} ${styles.workspace}`}>
-      {mobileMenu && <button type="button" className={shell.mobileScrim} aria-label="Close business navigation" onClick={() => setMobileMenu(false)} />}
-      <aside className={`${shell.sidebar} ${mobileMenu ? shell.sidebarOpen : ""}`} aria-label="Business owner navigation">
+      {mobileMenu && <button type="button" className={`${shell.mobileScrim} ${styles.noPrint}`} aria-label="Close business navigation" onClick={() => setMobileMenu(false)} />}
+      <aside className={`${shell.sidebar} ${styles.noPrint} ${mobileMenu ? shell.sidebarOpen : ""}`} aria-label="Business owner navigation">
         <div className={shell.sideBrand}>
           <Link href="/business" className={shell.brandLink} onClick={() => setMobileMenu(false)}>
             <span className={shell.trcBadge}>TR<span>C</span></span>
@@ -182,12 +127,12 @@ export function BusinessAnalytics({ email }: { email: string }) {
         <div className={shell.sideFoot}>
           <div className={shell.sideFootTitle}><ShieldCheck size={17} /> Smart pickup control</div>
           <p>Balance order volume by time slot and keep the counter moving smoothly.</p>
-          <span>Frontend workspace · Batch 6</span>
+          <span>Frontend workspace · Batch 7</span>
         </div>
       </aside>
 
       <div className={shell.mainArea}>
-        <header className={shell.topbar}>
+        <header className={`${shell.topbar} ${styles.noPrint}`}>
           <div className={shell.topLeft}>
             <button type="button" className={shell.mobileMenu} onClick={() => setMobileMenu(true)} aria-label="Open business navigation"><Menu size={22} /></button>
             <div><strong>Brewed Awakenings</strong><span>Pasig City Main Branch · Test shop</span></div>
@@ -202,93 +147,58 @@ export function BusinessAnalytics({ email }: { email: string }) {
 
         <main className={styles.content}>
           <div className={styles.headingRow}>
-            <div><span className={styles.eyebrow}>PERFORMANCE</span><h1>Analytics</h1><p>Understand demand, pickup behavior, and what drives revenue.</p></div>
-            <div className={styles.headerActions}>
-              <label className={styles.periodControl}><span>Report period</span><span className={styles.selectWrap}><select value={period} onChange={event => { setPeriod(event.target.value as AnalyticsPeriod); setNotice(""); }} aria-label="Choose analytics report period">{ANALYTICS_PERIODS.map(value => <option key={value} value={value}>{value}</option>)}</select><ChevronDown size={15} aria-hidden="true" /></span></label>
-              <button type="button" className={styles.secondaryButton} onClick={refreshReport}><RotateCcw size={15} /> Refresh</button>
-              <button type="button" className={styles.primaryButton} onClick={exportReport}><Download size={16} /> Export report</button>
+            <div><span className={styles.eyebrow}>PERFORMANCE · BATCH 7</span><h1>Analytics and Reports</h1><p>Explore orders, product performance, and pickup demand.</p></div>
+            <div className={`${styles.headerActions} ${styles.noPrint}`}>
+              <button type="button" className={styles.secondaryButton} onClick={() => refreshReport(true)}><RotateCcw size={15} /> Refresh</button>
+              <button type="button" className={styles.secondaryButton} disabled={!report} onClick={() => window.print()}><Printer size={15} /> Print report</button>
             </div>
           </div>
-
-          {notice && <div className={styles.notice} role="status"><span>{notice}</span><button type="button" aria-label="Dismiss message" onClick={() => setNotice("")}><X size={16} /></button></div>}
-
-          <section className={styles.kpiGrid} aria-label="Performance summary">
-            <article className={styles.kpiCard}><span>Gross sales</span><strong>{peso(metrics.grossSales)}</strong><small className={styles.positive}><TrendingUp size={14} /> +{metrics.salesGrowth}%</small></article>
-            <article className={styles.kpiCard}><span>Orders</span><strong>{metrics.orders.toLocaleString("en-PH")}</strong><small className={styles.positive}><TrendingUp size={14} /> +{metrics.orderGrowth}%</small></article>
-            <article className={styles.kpiCard}><span>Avg. order value</span><strong>{peso(metrics.averageOrderValue, 2)}</strong><small className={styles.positive}><TrendingUp size={14} /> +{peso(metrics.averageOrderDelta, 2)}</small></article>
-            <article className={styles.kpiCard}><span>On time rate</span><strong>{metrics.onTimeRate.toFixed(1)}%</strong><small className={styles.goodLabel}><Check size={13} /> Best this quarter</small></article>
+          <div className={styles.dataBanner}><strong>{source === "sample" ? "Illustrative sample history" : "Local browser demo orders"}</strong><span>Demo workspace. Reports do not contain live sales or verified payments. Local orders are shared by users of this browser.</span></div>
+          {notice && <div className={`${styles.notice} ${styles.noPrint}`} role="status"><span>{notice}</span><button type="button" aria-label="Dismiss message" onClick={() => setNotice("")}><X size={16} /></button></div>}
+          <section className={`${styles.filters} ${styles.noPrint}`} aria-label="Report filters">
+            <label className={styles.periodControl}><span>Data source</span><select value={source} onChange={e => { setSource(e.target.value as ReportSource); resetPage(); }}><option value="sample">Sample history</option><option value="local">Local demo orders</option></select></label>
+            <label className={styles.periodControl}><span>Report period</span><span className={styles.selectWrap}><select value={period} aria-label="Choose analytics report period" onChange={e => { const next = e.target.value as ReportPeriod; if (next === "Custom" && range) { setCustomStart(range.start); setCustomEnd(range.end); } setPeriod(next); resetPage(); }}>{REPORT_PERIODS.map(p => <option key={p}>{p}</option>)}</select><ChevronDown size={15} /></span></label>
+            <label className={styles.periodControl}><span>Order status</span><select value={status} onChange={e => { setStatus(e.target.value as typeof status); resetPage(); }}><option value="all">All statuses</option>{REPORT_STATUSES.map(s => <option key={s} value={s}>{STATUS_LABELS[s]}</option>)}</select></label>
+            {period === "Custom" && <><label className={styles.periodControl}><span>Start date</span><input type="date" min="2000-01-01" value={customStart} max={today} aria-invalid={!!rangeError} aria-describedby={rangeError ? "range-error" : undefined} onChange={e => { setCustomStart(e.target.value); resetPage(); }} /></label><label className={styles.periodControl}><span>End date</span><input type="date" min="2000-01-01" value={customEnd} max={today} aria-invalid={!!rangeError} aria-describedby={rangeError ? "range-error" : undefined} onChange={e => { setCustomEnd(e.target.value); resetPage(); }} /></label></>}
+            <div className={styles.exportControls}><label className={styles.periodControl}><span>CSV contents</span><select value={exportKind} onChange={e => setExportKind(e.target.value as typeof exportKind)}><option value="summary">Summary report</option><option value="orders">All filtered orders</option><option value="products">Collected products</option></select></label><button type="button" className={styles.primaryButton} onClick={exportReport} disabled={!report}><Download size={15} /> Export CSV</button></div>
           </section>
-
-          <div className={styles.analyticsGrid}>
-            <section className={styles.panel} aria-label="Sales and orders trend">
-              <div className={styles.panelHeading}>
-                <div><h2>Sales and orders</h2><p>{period} · {trendView.toLowerCase()} trend</p></div>
-                <div className={styles.viewTabs} role="group" aria-label="Chart interval">
-                  {TREND_VIEWS.map(view => <button key={view} type="button" className={trendView === view ? styles.viewTabActive : styles.viewTab} aria-pressed={trendView === view} onClick={() => setTrendView(view)}>{view}</button>)}
-                </div>
-              </div>
-              <div className={styles.chartLegend}><span><i className={styles.legendRevenue} /> Revenue</span><span><i className={styles.legendOrders} /> Order volume</span></div>
-              <div className={styles.chartWrap}>
-                <svg className={styles.chartSvg} viewBox="0 0 700 235" role="img" aria-label={`${trendView} sales and order volume trend for ${period}`}>
-                  {[35, 75, 115, 155, 195].map(y => <line key={y} x1="42" x2="672" y1={y} y2={y} stroke="#e8ebf0" strokeDasharray="4 6" />)}
-                  <polyline points={revenuePolyline} fill="none" stroke="#e26832" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round" />
-                  <polyline points={ordersPolyline} fill="none" stroke="#24345e" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round" />
-                  {revenuePoints.map((point, index) => <circle key={`rev-${index}`} cx={point.x} cy={point.y} r="3.5" fill="#e26832" stroke="#fff" strokeWidth="1.5" />)}
-                  {orderPoints.map((point, index) => <circle key={`ord-${index}`} cx={point.x} cy={point.y} r="3" fill="#24345e" stroke="#fff" strokeWidth="1.5" />)}
-                  {series.labels.map((label, index) => <text key={label} x={revenuePoints[index].x} y="220" textAnchor="middle" fontSize="11" fill="#8791a4">{label}</text>)}
-                </svg>
-              </div>
-              <p className={styles.panelFootnote}>Illustrative reporting trend. Final figures will be calculated from completed orders in the database.</p>
+          {rangeError && <p className={styles.error} role="alert" id="range-error">{rangeError}</p>}
+          {storageError && source === "local" && <p className={styles.error} role="alert">{storageError}</p>}
+          {!today && <p role="status">Loading report data...</p>}
+          {report && <>
+            <p className={styles.rangeSummary}><strong>{report.filters.start} through {report.filters.end}</strong> · Asia/Manila · {status === "all" ? "All statuses" : STATUS_LABELS[status]} · Compared with {report.previous.start} through {report.previous.end}</p>
+            {source === "local" && local.undated > 0 && <p className={styles.dataQuality}>{local.undated} older local order{local.undated === 1 ? " has" : "s have"} no creation date and {local.undated === 1 ? "is" : "are"} excluded. New orders created from Dashboard or Orders will include dates.</p>}
+            {report.excluded > 0 && <p className={styles.dataQuality}>{report.excluded} invalid or duplicate records excluded.</p>}
+            {source === "sample" && report.previous.start < samples[0]?.date && <p className={styles.dataQuality}>Sample history starts on {samples[0]?.date}. Dates before that have no sample records; comparisons may be incomplete.</p>}
+            <section className={styles.kpiGrid} aria-label="Performance summary">
+              <article className={styles.kpiCard}><span>Collected order value</span><strong>{pesoCents(report.totals.valueCents)}</strong><small>{changeLabel(report.salesChange)}</small></article>
+              <article className={styles.kpiCard}><span>Orders in selection</span><strong>{report.totals.orders.toLocaleString("en-PH")}</strong><small>{changeLabel(report.orderChange)}</small></article>
+              <article className={styles.kpiCard}><span>Average collected order</span><strong>{pesoCents(report.totals.averageCents)}</strong><small>{report.totals.collected} collected orders</small></article>
+              <article className={styles.kpiCard}><span>Cancellation rate</span><strong>{report.totals.cancellationRate.toFixed(1)}%</strong><small>{report.totals.cancelled} of {report.totals.orders} selected orders</small></article>
             </section>
-
-            <section className={styles.panel} aria-label="Peak pickup heatmap">
-              <div className={styles.panelHeading}><div><h2>Peak pickup heatmap</h2><p>Busy pickup windows by day and time</p></div><span className={styles.heatmapKey}>Higher demand <span><i /><i /><i /></span></span></div>
-              <div className={styles.heatmapScroller}>
-                <div className={styles.heatmap} role="group" aria-label="Select a day and pickup time to inspect demand">
-                  <span className={styles.heatCorner} />
-                  {PICKUP_DAYS.map(day => <span key={day} className={styles.heatDay}>{day}</span>)}
-                  {PICKUP_PERIODS.map((time, rowIndex) => <div className={styles.heatRow} key={time}>
-                    <span className={styles.heatTime}>{time}</span>
-                    {PICKUP_DAYS.map((day, colIndex) => {
-                      const level = PICKUP_HEATMAP[rowIndex][colIndex];
-                      const isSelected = selectedHeatCell?.day === day && selectedHeatCell?.time === time;
-                      return <button key={`${day}-${time}`} type="button" className={`${styles.heatCell} ${styles[`heat${level}`]} ${isSelected ? styles.heatSelected : ""}`} title={`${day}, ${time}: ${level >= 4 ? "High" : level === 3 ? "Moderate" : "Low"} illustrative demand`} aria-label={`${day} ${time}, ${level >= 4 ? "high" : level === 3 ? "moderate" : "low"} illustrative pickup demand`} aria-pressed={isSelected} onClick={() => setSelectedHeatCell({ day, time, level })} />;
-                    })}
-                  </div>)}
-                </div>
-              </div>
-              <div className={styles.heatmapFooter}>{selectedHeatCell ? <><strong>{selectedHeatCell.day}, {selectedHeatCell.time}</strong><span>{selectedHeatCell.level >= 4 ? "High" : selectedHeatCell.level === 3 ? "Moderate" : "Low"} pickup demand in the sample heatmap.</span></> : <span>Select a cell to inspect its illustrative demand level.</span>}</div>
-            </section>
-          </div>
-
-          <div className={styles.bottomGrid}>
-            <section className={styles.panel} aria-label="Top products">
-              <div className={styles.panelHeading}><div><h2>Top products</h2><p>Products contributing most to sample sales</p></div><span className={styles.countPill}>Top 3</span></div>
-              <div className={styles.tableScroller}>
-                <table className={styles.productTable}>
-                  <thead><tr><th>Product</th><th>Units</th><th>Revenue</th><th>Trend</th></tr></thead>
-                  <tbody>{TOP_PRODUCTS.map(product => <tr key={product.name}>
-                    <td><strong>{product.name}</strong></td><td>{product.units.toLocaleString("en-PH")}</td><td>{peso(product.revenue)}</td><td><span className={styles.trendBadge}><TrendingUp size={12} /> {product.trend}%</span></td>
-                  </tr>)}</tbody>
-                </table>
-              </div>
-              <p className={styles.panelFootnote}>Top product figures are sample values from the proposal GUI, not live sales totals.</p>
-            </section>
-
-            <section className={styles.panel} aria-label="Customer retention">
-              <div className={styles.panelHeading}><div><h2>Customer retention</h2><p>Customers who ordered again within 30 days</p></div><UsersRound size={19} className={styles.panelIcon} /></div>
-              <div className={styles.retentionValue}>{BASE_ANALYTICS.customerRetention}%</div>
-              <div className={styles.retentionTrack} role="progressbar" aria-label="Customer retention" aria-valuemin={0} aria-valuemax={100} aria-valuenow={BASE_ANALYTICS.customerRetention}><span style={{ width: `${BASE_ANALYTICS.customerRetention}%` }} /></div>
-              <div className={styles.retentionDivider} />
-              <div className={styles.retentionWindow}><span>Best retention window</span><strong>Weekday afternoons, 2:00–5:00 PM</strong></div>
-              <div className={styles.retentionCallout}><BarChart3 size={16} /><span>Use repeat purchase trends to plan loyalty offers and pickup capacity.</span></div>
-            </section>
-          </div>
-
-          <div className={styles.reportFoot}>
-            <span><BarChart3 size={14} /> {activity.count} additional test order{activity.count === 1 ? "" : "s"} from the local owner workspace included in the sales summary.</span>
-            <span>Frontend workspace · Analytics and Reports · Batch 6</span>
-          </div>
+            {report.orders.length === 0 && <div className={styles.empty} role="status"><strong>No orders in this selection</strong><p>Change the dates, status or data source. To test local reports, create an order in <Link href="/business/orders">Orders</Link>. Collected value appears after the order is marked Collected.</p></div>}
+            <div className={styles.analyticsGrid}>
+              <section className={styles.panel} aria-label="Sales and orders trend">
+                <div className={styles.panelHeading}><div><h2>Order trends</h2><p>Every chart uses the selected dates and status.</p></div><div className={`${styles.viewTabs} ${styles.noPrint}`} role="group" aria-label="Chart interval">{TREND_VIEWS.map(view => <button key={view} type="button" className={trendView === view ? styles.viewTabActive : styles.viewTab} aria-pressed={trendView === view} onClick={() => setTrendView(view)}>{view}</button>)}</div></div>
+                <div className={`${styles.viewTabs} ${styles.noPrint}`} role="group" aria-label="Chart metric"><button type="button" className={metric === "value" ? styles.viewTabActive : styles.viewTab} aria-pressed={metric === "value"} onClick={() => setMetric("value")}>Collected value</button><button type="button" className={metric === "orders" ? styles.viewTabActive : styles.viewTab} aria-pressed={metric === "orders"} onClick={() => setMetric("orders")}>Order count</button></div>
+                <div className={styles.chartWrap}><TrendChart report={report} metric={metric} /></div>
+                <p className={styles.panelFootnote}>{trendView} buckets. Weeks start on Monday. First and last buckets may cover partial weeks or months.</p>
+                <details className={`${styles.trendDetails} ${styles.noPrint}`}><summary>View exact trend values</summary><div className={styles.tableScroller}><table className={styles.productTable}><caption>All selected trend buckets</caption><thead><tr><th scope="col">From</th><th scope="col">Through</th><th scope="col">Orders</th><th scope="col">Collected value</th></tr></thead><tbody>{report.buckets.map(b => <tr key={b.key}><td>{b.start}</td><td>{b.end}</td><td>{b.orders}</td><td>{pesoCents(b.valueCents)}</td></tr>)}</tbody></table></div></details>
+              </section>
+              <section className={styles.panel} aria-label="Pickup demand">
+                <div className={styles.panelHeading}><div><h2>Pickup demand</h2><p>Noncancelled orders by creation weekday and pickup hour. Each cell covers four hours.</p></div></div>
+                <div className={styles.heatmapScroller}><div className={styles.heatmap} role="group" aria-label="Pickup counts by weekday and hour"><span />{WEEKDAYS.map(day => <span key={day} className={styles.heatDay}>{day}</span>)}{PICKUP_WINDOWS.map((hour, row) => <div className={styles.heatRow} key={hour}><span className={styles.heatTime}>{String(hour).padStart(2, "0")}:00</span>{WEEKDAYS.map((day, col) => { const count = pickupCounts[row][col]; const selected = selectedHeatCell?.day === col && selectedHeatCell.hour === hour; return <button key={day} type="button" className={`${styles.heatCell} ${styles[`heat${count === 0 ? 0 : Math.ceil(count / maxPickup * 5)}`]} ${selected ? styles.heatSelected : ""}`} aria-label={`${day} ${hour}:00 to ${hour + 3}:59: ${count} orders`} aria-pressed={selected} onClick={() => setSelectedHeatCell({ day: col, hour })}>{count}</button>; })}</div>)}</div></div>
+                <div className={styles.heatmapFooter} aria-live="polite">{selectedHeatCell ? <span>{WEEKDAYS[selectedHeatCell.day]}, {selectedHeatCell.hour}:00 to {selectedHeatCell.hour + 3}:59: {pickupCounts[PICKUP_WINDOWS.indexOf(selectedHeatCell.hour)][selectedHeatCell.day]} orders.</span> : <span>Select a cell for its count. These are pickup time preferences, not measured arrival times.</span>}{report.unknownPickupTimes > 0 && <span>{report.unknownPickupTimes} orders have no valid pickup time.</span>}</div>
+              </section>
+            </div>
+            <div className={styles.bottomGrid}>
+              <section className={styles.panel} aria-label="Product performance"><div className={styles.panelHeading}><div><h2>Product performance</h2><p>All products from collected orders, ranked by value.</p></div><span className={styles.countPill}>{report.products.length} products</span></div><div className={styles.tableScroller}><table className={styles.productTable}><caption>Collected products</caption><thead><tr><th scope="col">Product</th><th scope="col">Units</th><th scope="col">Orders</th><th scope="col">Value</th></tr></thead><tbody>{report.products.map(p => <tr key={p.name}><td><strong>{p.name}</strong></td><td>{p.units}</td><td>{p.orders}</td><td>{pesoCents(p.valueCents)}</td></tr>)}{report.products.length === 0 && <tr><td colSpan={4}>No collected products in this selection.</td></tr>}</tbody></table></div></section>
+              <section className={styles.panel} aria-label="Order outcomes"><div className={styles.panelHeading}><div><h2>Order outcomes</h2><p>Status counts follow the report filters.</p></div></div><ul className={styles.statusList}>{REPORT_STATUSES.map(s => <li key={s}><span>{STATUS_LABELS[s]}</span><strong>{report.statuses[s]}</strong></li>)}</ul><div className={styles.retentionDivider} /><h2 className={styles.smallHeading}>Repeat customer rate</h2><div className={styles.retentionValue}>{report.repeatRate === null ? "Unavailable" : `${report.repeatRate.toFixed(1)}%`}</div><p className={styles.definition}>{report.knownCustomers ? `${report.repeatCustomers} of ${report.knownCustomers} identified customers placed at least two collected orders within this selection.` : source === "local" ? "Local orders have no stable customer IDs, so repeat customers cannot be measured." : "No identified collected customers in this selection."}</p>{report.unknownCustomers > 0 && <p className={styles.definition}>{report.unknownCustomers} collected orders excluded from the customer calculation because no customer ID is available.</p>}</section>
+            </div>
+            <section className={`${styles.panel} ${styles.noPrint}`} aria-label="Detailed order report"><div className={styles.panelHeading}><div><h2>Detailed orders</h2><p>{report.orders.length} filtered rows. Order CSV includes every page. Order value below includes all selected statuses.</p></div></div><div className={styles.tableScroller}><table className={styles.productTable}><caption>Orders by creation date, newest first</caption><thead><tr><th scope="col">Order</th><th scope="col">Date</th><th scope="col">Product</th><th scope="col">Qty</th><th scope="col">Value</th><th scope="col">Status</th></tr></thead><tbody>{pageRows.map(o => <tr key={o.id}><td>{o.id}</td><td>{o.date}</td><td>{o.product}</td><td>{o.quantity}</td><td>{pesoCents(o.quantity * o.unitPriceCents)}</td><td>{STATUS_LABELS[o.status]}</td></tr>)}{!pageRows.length && <tr><td colSpan={6}>No matching orders.</td></tr>}</tbody></table></div><div className={styles.pagination}><button type="button" className={styles.secondaryButton} disabled={currentPage === 0} onClick={() => setPage(currentPage - 1)}>Previous</button><span aria-live="polite">Page {currentPage + 1} of {totalPages}</span><button type="button" className={styles.secondaryButton} disabled={currentPage + 1 >= totalPages} onClick={() => setPage(currentPage + 1)}>Next</button></div></section>
+            <section className={styles.definitions} aria-label="Report definitions"><h2>How to read this report</h2><p>{REPORT_NOTE}</p><p>Order counts include all statuses selected above. Cancelled and unfinished orders contribute no collected value. Repeat customer rate measures repeat purchases within this selection, not cohort retention. Pickup demand uses order creation weekday because the owner queue does not store a separate pickup date.</p><p>Previous period comparisons use the same number of calendar days immediately before the selection and the same source and status filters. Zero previous value is shown without a percentage when the current value is positive.</p><p>Printing produces this summary. Use CSV for full order details and exact trend values.</p></section>
+            <div className={styles.reportFoot}><span>Refreshed {updatedAt ? new Date(updatedAt).toLocaleString("en-PH", { timeZone: "Asia/Manila" }) : ""} · Asia/Manila</span><span>Analytics and Reports · Batch 7</span></div>
+          </>}
         </main>
       </div>
     </div>

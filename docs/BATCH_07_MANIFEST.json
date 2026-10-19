@@ -1,0 +1,120 @@
+{
+  "batch": 7,
+  "title": "Analytics and Reports",
+  "route": "/business/analytics",
+  "deletions": [],
+  "files": [
+    {
+      "path": "app/business/analytics/page.tsx",
+      "action": "replace",
+      "bytes": 1019,
+      "sha256": "dd4409d35d49d29ae311caee64041c473c128d2718d088d7190a60c9423fe16b",
+      "original_sha256": "e74b8bb96d8965ec49fe84f4492a9cce18f57f702bc3ba631c6a91d188529b83"
+    },
+    {
+      "path": "components/business/analytics-local-data.ts",
+      "action": "add",
+      "bytes": 1146,
+      "sha256": "72a31f244abd084fbdd565fddaca0d01265ae983dc42f8df60569fe06341a266",
+      "original_sha256": null
+    },
+    {
+      "path": "components/business/analytics-report.ts",
+      "action": "add",
+      "bytes": 13005,
+      "sha256": "98e748f61773dbb3ae8b9ae7a585c66ef167f053f5beea161e368b45f9905ac1",
+      "original_sha256": null
+    },
+    {
+      "path": "components/business/analytics.module.css",
+      "action": "replace",
+      "bytes": 13947,
+      "sha256": "eb093583e37601e54e3867596191f19281ff0ebfb483987ee6ed5e00c19d870e",
+      "original_sha256": "e47096d98e29202ff6ed496191ba4adc9b907535f710f93af7c5f5e36e77a4ae"
+    },
+    {
+      "path": "components/business/business-analytics.tsx",
+      "action": "replace",
+      "bytes": 25270,
+      "sha256": "d912d55029f6057133163473583c93038b90779dc4ff3cc17af12a0108844064",
+      "original_sha256": "aa43d16c061dd1e6f7967fdaee9fe7424b369ac50402c8971f7695fe392047a9"
+    },
+    {
+      "path": "components/business/business-customers.tsx",
+      "action": "replace",
+      "bytes": 34398,
+      "sha256": "c20e670807a874f35a7843f8eb728b9b84e87b0c954ccf58e42333b158e62db7",
+      "original_sha256": "c4852cd3e31ac9d49d6586e435dfaec3a40a95ca30a577ab45646660c4bccee4"
+    },
+    {
+      "path": "components/business/business-dashboard.tsx",
+      "action": "replace",
+      "bytes": 24498,
+      "sha256": "6a00c808e6cbf43ff4e72d59b1a7b6f10906d091b5ce62adae29314ec5e27a4a",
+      "original_sha256": "c2cf973146dc808debee2c9e80f7a149e9647b869e4606dbe237dda0b8053add"
+    },
+    {
+      "path": "components/business/business-menu.tsx",
+      "action": "replace",
+      "bytes": 23650,
+      "sha256": "6f709624c104410f99a796a65b5b2655374ec37c02615eae82fdddb013fdda5f",
+      "original_sha256": "6ef25edde16696d7e45a06c256ee8d8fc744dddb9d7ca39de8fff367ef166a26"
+    },
+    {
+      "path": "components/business/business-orders.tsx",
+      "action": "replace",
+      "bytes": 20442,
+      "sha256": "0097b286a9d85b7082586fbc24774b9c23daee0ef8eaa2a33120e8cfdccc9a4b",
+      "original_sha256": "a2bc47f133f4dd2805034ea563266af86a3f1be242377245bcd637c9d0a9c30b"
+    },
+    {
+      "path": "components/business/business-pickup-schedule.tsx",
+      "action": "replace",
+      "bytes": 23362,
+      "sha256": "71652156a3fe8c7f7a088852f7ad59095a8e10262dbbf23256f584167157d01e",
+      "original_sha256": "5c674dc7f070c5c6d464287467c7de2a9d9251e1574c8aae3ac9a5e9e0ea6136"
+    },
+    {
+      "path": "components/business/demo-business-data.ts",
+      "action": "replace",
+      "bytes": 6264,
+      "sha256": "933ca87557b31e70d40688a4fe626901d83393b96b2ce0a19911759f0211cee8",
+      "original_sha256": "5a72167be293dff68e4eb91c2d8266cf6397b9e0400cd4eeef6df8a99ebc04cf"
+    },
+    {
+      "path": "scripts/check-business-batch06.mjs",
+      "action": "replace",
+      "bytes": 3807,
+      "sha256": "4345a6c8e452ea4f9d945702ef98e735f870dff5ba5d45d6a183e746ca116730",
+      "original_sha256": "634546e80ec9465d13b12a2eb8931ff40d0c7ccfc0634126d6c3ade2a32c9941"
+    },
+    {
+      "path": "scripts/check-business-batch07.mjs",
+      "action": "add",
+      "bytes": 10924,
+      "sha256": "d1949658fbc72d08bcec065247d54e15b8e508200455ffcb36aff4dc41a731ba",
+      "original_sha256": null
+    },
+    {
+      "path": "BATCH_07_README.md",
+      "action": "add",
+      "bytes": 6149,
+      "sha256": "d3233b5a6dbf560615001591a24f387448583e219419c68660ffc6e28a9fb3ec",
+      "original_sha256": null
+    },
+    {
+      "path": "docs/BATCH_07_REVIEW.md",
+      "action": "add",
+      "bytes": 7518,
+      "sha256": "cf6bfcdf92dabe09a3b927c67cfc9ccf93c7791f63b0c29a82c3f0a970f1611a",
+      "original_sha256": null
+    },
+    {
+      "path": "docs/BATCH_07_VALIDATION.txt",
+      "action": "add",
+      "bytes": 1429,
+      "sha256": "c8dc8d05a62287749e5bb93a7a8be0b220ee82e9a8f614ba1e02b4ba662118cc",
+      "original_sha256": null
+    }
+  ]
+}

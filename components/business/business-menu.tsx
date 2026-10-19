@@ -31,7 +31,7 @@ const nav = [
   { name: "Menu", icon: Coffee, href: "/business/menu", batch: 4 },
   { name: "Customers", icon: UsersRound, href: "/business/customers", batch: 5 },
   { name: "Analytics", icon: BarChart3, href: "/business/analytics", batch: 6 },
-  { name: "Settings", icon: Settings, href: "", batch: 7 },
+  { name: "Settings", icon: Settings, href: "", batch: 8 },
 ] as const;
 const categoryIcons: Record<MenuCategory, string> = {
   "Coffee": "☕", "Milk Tea": "🧋", "Beverages": "🥤", "Shakes": "🍨",

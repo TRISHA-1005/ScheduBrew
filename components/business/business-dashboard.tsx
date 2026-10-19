@@ -25,7 +25,7 @@ const sections = [
   { label: "Menu", icon: Coffee, batch: 4 },
   { label: "Customers", icon: UsersRound, batch: 5 },
   { label: "Analytics", icon: BarChart3, batch: 6 },
-  { label: "Settings", icon: Settings, batch: 7 },
+  { label: "Settings", icon: Settings, batch: 8 },
 ] as const;
 
 const stages: Array<{ key: DemoOrderStatus; label: string; className: string }> = [
@@ -148,6 +148,7 @@ export function BusinessDashboard({ email }: { email: string }) {
     const product = demoProducts.find(item => item.name === chosenProduct);
     if (!product) return;
     const order: BusinessDemoOrder = {
+      createdAt: new Date().toISOString(),
       id: `WALK-${Date.now().toString(36).toUpperCase()}`,
       customer: name, product: product.name, unitPrice: product.price,
       quantity: chosenQuantity, pickupTime: chosenTime,

@@ -28,7 +28,7 @@ const nav = [
   { name: "Menu", icon: Coffee, href: "/business/menu", batch: 4 },
   { name: "Customers", icon: UsersRound, href: "/business/customers", batch: 5 },
   { name: "Analytics", icon: BarChart3, href: "/business/analytics", batch: 6 },
-  { name: "Settings", icon: Settings, href: "", batch: 7 },
+  { name: "Settings", icon: Settings, href: "", batch: 8 },
 ] as const;
 
 const statusNames: Record<DemoOrderStatus, string> = {
@@ -153,6 +153,7 @@ export function BusinessOrders({ email }: { email: string }) {
       return;
     }
     const order: BusinessDemoOrder = {
+      createdAt: new Date().toISOString(),
       id: `WALK-${Date.now().toString(36).toUpperCase()}${Math.random().toString(36).slice(2, 5).toUpperCase()}`,
       customer, product: chosen.name, unitPrice: chosen.price, quantity,
       pickupTime: pickup, status: "queued", source: "walk-in demo",

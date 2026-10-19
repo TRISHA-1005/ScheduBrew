@@ -15,6 +15,8 @@ export type BusinessDemoOrder = {
   pickupTime: string;
   status: DemoOrderStatus;
   source: "example" | "walk-in demo";
+  /** Optional for compatibility with orders saved before Batch 7. */
+  createdAt?: string;
 };
 
 export type DemoPickupSlot = {
@@ -23,6 +25,8 @@ export type DemoPickupSlot = {
   booked: number;
   capacity: number;
 };
+
+export const BUSINESS_CHANGED_EVENT = "schedu-business-data-changed";
 
 export const BUSINESS_ORDER_STORAGE = "schedu_business_demo_orders_v1";
 export const BUSINESS_STATUS_STORAGE = "schedu_business_demo_statuses_v1";
@@ -80,6 +84,7 @@ export function safeWriteJson(key: string, value: unknown): boolean {
   if (typeof window === "undefined") return false;
   try {
     window.localStorage.setItem(key, JSON.stringify(value));
+    window.dispatchEvent(new Event(BUSINESS_CHANGED_EVENT));
     return true;
   } catch {
     return false;
@@ -100,13 +105,14 @@ export function readExtraOrders(): BusinessDemoOrder[] {
         typeof v.customer !== "string" || typeof v.product !== "string" ||
         typeof v.pickupTime !== "string" || !Number.isInteger(v.quantity) ||
         (v.quantity ?? 0) < 1 || (v.quantity ?? 0) > 10 ||
-        typeof v.unitPrice !== "number" || !Number.isFinite(v.unitPrice) ||
+        typeof v.unitPrice !== "number" || !Number.isFinite(v.unitPrice) || v.unitPrice < 0 || v.unitPrice > 1000000 ||
         !isDemoStatus(v.status)) return [];
     return [{
       id: v.id.slice(0, 48), customer: v.customer.slice(0, 60),
       product: v.product.slice(0, 90), pickupTime: v.pickupTime.slice(0, 25),
       quantity: v.quantity!, unitPrice: v.unitPrice, status: v.status,
       source: "walk-in demo" as const,
+      createdAt: typeof v.createdAt === "string" && /^\d{4}-\d{2}-\d{2}T.*(?:Z|[+-]\d{2}:\d{2})$/.test(v.createdAt) && Number.isFinite(Date.parse(v.createdAt)) ? new Date(v.createdAt).toISOString() : undefined,
     }];
   }).slice(0, 100);
 }

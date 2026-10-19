@@ -6,7 +6,7 @@ import { BusinessAnalytics } from "@/components/business/business-analytics";
 
 export const metadata: Metadata = {
   title: "Analytics and Reports | ScheduBrew Owner Workspace",
-  description: "Sales, orders, pickup demand and customer retention analytics frontend prototype",
+  description: "Filterable demo analytics, collected order reports, CSV exports and printable summaries",
 };
 
 async function AnalyticsContent() {

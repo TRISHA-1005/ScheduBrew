@@ -16,7 +16,7 @@ const methods: { id: Payment; title: string; description: string }[] = [
   { id: "gcash", title: "GCash", description: "Preview only" },
   { id: "maya", title: "Maya", description: "Preview only" },
   { id: "card", title: "Card", description: "Preview only" },
-  { id: "counter", title: "Pay at counter", description: "Available for demo" },
+  { id: "counter", title: "Pay at counter", description: "Available in test mode" },
 ];
 
 export function CheckoutPage({ email }: { email: string }) {
@@ -50,16 +50,16 @@ export function CheckoutPage({ email }: { email: string }) {
     event.preventDefault();
     setError("");
     if (submitting) return;
-    if (!shop || !count) { setError("Your cart is empty. Add sample products first."); return; }
+    if (!shop || !count) { setError("Your cart is empty. Add products first."); return; }
     const trimmedName = name.trim();
     if (trimmedName.length < 2 || trimmedName.length > 90) { setError("Enter a full name between 2 and 90 characters."); return; }
     const cleanedPhone = phone.replace(/[\s()+-]/g, "");
     if (!/^(09\d{9}|639\d{9})$/.test(cleanedPhone)) { setError("Enter a valid Philippine mobile number, such as 09171234567."); return; }
     if (contactEmail.trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contactEmail.trim())) { setError("Enter a valid email address or leave it blank."); return; }
     if (!dates.some(d => d.key === date) || !pickupTime || !demoSlots(date).includes(pickupTime)) {
-      setError("Select a sample pickup date and an available future time option."); return;
+      setError("Select a pickup date and an available future time option."); return;
     }
-    if (payment !== "counter") { setError("Online payments are not connected. Choose Pay at counter to finish the demo."); return; }
+    if (payment !== "counter") { setError("Online payments are not connected. Choose Pay at counter to continue in test mode."); return; }
     if (note.length > 400) { setError("Pickup notes must be 400 characters or fewer."); return; }
 
     setSubmitting(true);
@@ -76,7 +76,7 @@ export function CheckoutPage({ email }: { email: string }) {
       saveCart(emptyCart());
       router.push(`/customer/checkout/confirmation?ref=${encodeURIComponent(reference)}`);
     } catch {
-      setError("Your browser could not store the demo order. Check that browser storage is enabled.");
+      setError("Your browser could not save the order. Check that browser storage is enabled.");
       setSubmitting(false);
     }
   }
@@ -84,28 +84,28 @@ export function CheckoutPage({ email }: { email: string }) {
   return <div className={s.page}>
     <CustomerNav email={email}/>
     <main className={s.container}>
-      <div className={s.demoNotice}>FRONTEND PREVIEW <span>No real pickup reservation or payment can be made from this page. All stores, prices, and slots are illustrative.</span></div>
+      
       <Link href="/customer/cart" className={s.backLink}><ArrowLeft size={15}/> Back to Cart</Link>
-      <div className={c.heading}><p className={c.kicker}>CHECKOUT</p><h1>Reserve your pickup</h1><p>Choose a sample time and review your order. This is a demonstration only.</p></div>
-      {!loaded ? <section className={c.emptyCard}>Loading your checkout preview…</section> : !shop || !count ?
+      <div className={c.heading}><p className={c.kicker}>CHECKOUT</p><h1>Reserve your pickup</h1><p>Choose your pickup time, review your cart, and enter contact details.</p></div>
+      {!loaded ? <section className={c.emptyCard}>Loading checkout…</section> : !shop || !count ?
         <section className={c.emptyCard}><ShoppingBag size={38}/><h2>No items to check out</h2><p>Choose a shop and add items to your cart before continuing.</p><Link href="/customer#browse" className={c.primaryButton}>Discover shops</Link></section> :
         <form onSubmit={confirm} noValidate>
           <div className={`${c.layout} ${c.checkoutLayout}`}>
             <div className={c.checkoutFormScroll} role="region" aria-label="Pickup schedule, contact information and payment options" tabIndex={0}>
               <section className={c.card}>
-                <div className={c.cardTitle}><CalendarDays className={c.cardTitleIcon}/><div><h2>1. Pickup schedule</h2><p>Select a sample date and time. These are not live shop bookings.</p></div></div>
+                <div className={c.cardTitle}><CalendarDays className={c.cardTitleIcon}/><div><h2>1. Pickup schedule</h2><p>Select a pickup date and time.</p></div></div>
                 <div className={c.field}><label htmlFor="demo-pickup-date">Pickup date</label>
                   <select id="demo-pickup-date" value={date} onChange={e => chooseDay(e.target.value)}>
                     {dates.map(d => <option key={d.key} value={d.key}>{d.label} · {d.key}</option>)}
                   </select>
                 </div>
-                <div className={c.field}><label>Sample pickup time options</label></div>
-                {slots.length ? <div className={c.slotGrid}>{slots.slice(0, 15).map(slot => <button key={slot} type="button" className={`${c.slot} ${pickupTime === slot ? c.slotSelected : ""}`} aria-pressed={pickupTime === slot} onClick={() => { setPickupTime(slot); setError(""); }}>{formatSlot(slot)}</button>)}</div> : <div className={c.slotEmpty}>No sample times remain today. Choose another date.</div>}
-                <p className={c.help}>A real system will check shop operating hours, preparation times, and available capacity in PostgreSQL before confirming a pickup slot.</p>
-                {pickupTime && <p className={c.help}><strong>Selected:</strong> {date} at {formatSlot(pickupTime)} (illustrative only)</p>}
+                <div className={c.field}><label>Available pickup times</label></div>
+                {slots.length ? <div className={c.slotGrid}>{slots.slice(0, 15).map(slot => <button key={slot} type="button" className={`${c.slot} ${pickupTime === slot ? c.slotSelected : ""}`} aria-pressed={pickupTime === slot} onClick={() => { setPickupTime(slot); setError(""); }}>{formatSlot(slot)}</button>)}</div> : <div className={c.slotEmpty}>No pickup times remain today. Choose another date.</div>}
+                <p className={c.help}>Test mode: Time options are not live reservations. No pickup slot is booked.</p>
+                {pickupTime && <p className={c.help}><strong>Selected:</strong> {date} at {formatSlot(pickupTime)}</p>}
               </section>
               <section className={c.card}>
-                <div className={c.cardTitle}><UserRound className={c.cardTitleIcon}/><div><h2>2. Contact information</h2><p>Contact details are saved only in this browser for the demo.</p></div></div>
+                <div className={c.cardTitle}><UserRound className={c.cardTitleIcon}/><div><h2>2. Contact information</h2><p>Contact details are saved only on this device during testing.</p></div></div>
                 <div className={c.threeCol}>
                   <div className={c.field}><label htmlFor="demo-fullname">Full name *</label><input id="demo-fullname" value={name} onChange={e => setName(e.target.value)} autoComplete="name" maxLength={90} placeholder="Your full name" required/></div>
                   <div className={c.field}><label htmlFor="demo-phone">Mobile number *</label><input id="demo-phone" value={phone} onChange={e => setPhone(e.target.value)} autoComplete="tel" inputMode="tel" placeholder="0917 123 4567" required/></div>
@@ -118,7 +118,7 @@ export function CheckoutPage({ email }: { email: string }) {
                 <div className={c.paymentGrid}>
                   {methods.map(method => <button type="button" key={method.id} aria-pressed={payment === method.id} onClick={() => {setPayment(method.id);setError("");}} className={`${c.paymentOption} ${payment === method.id ? c.selected : ""} ${method.id !== "counter" ? c.disabledPayment : ""}`}><strong>{method.id === payment ? "◉ " : "○ "}{method.title}</strong><small>{method.description}</small></button>)}
                 </div>
-                <div className={c.safe}><LockKeyhole size={16}/><span>GCash, Maya, and card payments are visual previews only. No card or wallet details are collected. Select <strong>Pay at counter</strong> to generate a browser only demo confirmation.</span></div>
+                <div className={c.safe}><LockKeyhole size={16}/><span>GCash, Maya, and card payments are visual previews only. No card or wallet details are collected. Select <strong>Pay at counter</strong> to save a local test order.</span></div>
               </section>
             </div>
             <aside className={c.checkoutSide} aria-label="Order summary and checkout information">
@@ -128,10 +128,10 @@ export function CheckoutPage({ email }: { email: string }) {
                 <div className={c.rule}/>
                 <div className={c.summaryLine}><span>Subtotal</span><strong>{peso(subtotal)}</strong></div>
                 <div className={c.summaryLine}><span>Illustrative service fee</span><strong>{peso(SAMPLE_SERVICE_FEE)}</strong></div>
-                <div className={c.summaryTotal}><span>Sample total</span><strong>{peso(total)}</strong></div>
+                <div className={c.summaryTotal}><span>Total</span><strong>{peso(total)}</strong></div>
                 {error && <p className={c.error} role="alert">{error}</p>}
-                <button type="submit" disabled={submitting} className={c.primaryButton}>{submitting ? "Saving preview…" : "Confirm demo order"}</button>
-                <p className={c.muted}>This does not notify a shop, reserve a real slot, or process any payment.</p>
+                <button type="submit" disabled={submitting} className={c.primaryButton}>{submitting ? "Saving order…" : "Confirm Order"}</button>
+                <p className={c.muted}>Test mode: Confirm Order saves a local record only. It does not notify a shop, reserve a real slot, or collect payment.</p>
                 <p className={c.muted}>Please do not use real private contact details while testing with shared devices.</p>
               </section>
               <div className={`${c.benefits} ${c.checkoutBenefits}`}>

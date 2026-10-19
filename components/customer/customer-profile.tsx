@@ -66,22 +66,22 @@ export function CustomerProfile({ email }: { email: string }) {
     if (!savePreferences(email, cleaned)) return setFeedback("Unable to save. Check browser storage permissions.");
     setPreferences(cleaned);
     setEditing(false);
-    setFeedback("Your demonstration profile was saved in this browser.");
+    setFeedback("Your profile preferences have been saved on this device.");
   }
 
   function onFavorite(shopId: string) {
     const next = toggleFavorite(email, shopId);
     if (!next) return setFeedback("Unable to change favorites. Please check browser storage settings.");
     setFavorites(next);
-    setFeedback("Favorites updated for this browser preview.");
+    setFeedback("Favorites updated successfully.");
   }
 
   return <div className={s.page}>
     <CustomerNav email={email} />
     <main className={s.container}>
-      <div className={s.demoNotice}>FRONTEND PREVIEW <span>Profile settings and favorites save in this browser only. Your real Supabase account and merchant records are not edited.</span></div>
+      
       <div className={p.heading}>
-        <div><div className={p.crumb}><Link href="/customer">Discover</Link><ChevronRight size={13}/> Profile</div><p className={p.eyebrow}>CUSTOMER ACCOUNT</p><h1>Good to see you, {loaded ? name.split(" ")[0] : "Customer"}!</h1><p>Manage your sample pickup preferences, favorites, rewards, and order history.</p></div>
+        <div><div className={p.crumb}><Link href="/customer">Discover</Link><ChevronRight size={13}/> Profile</div><p className={p.eyebrow}>CUSTOMER ACCOUNT</p><h1>Good to see you, {loaded ? name.split(" ")[0] : "Customer"}!</h1><p>Manage your pickup preferences, favorites, rewards, and order history.</p></div>
         <button className={p.outlineButton} type="button" onClick={() => { setEditing(!editing); setDraft(preferences); setFeedback(""); }}><Pencil size={16}/>{editing ? "Cancel editing" : "Edit profile"}</button>
       </div>
       {feedback && <div className={p.feedback} role="status">{feedback}</div>}
@@ -90,10 +90,10 @@ export function CustomerProfile({ email }: { email: string }) {
           <section className={p.identityCard}>
             <div className={p.identityTop}><span className={p.avatar}>{initialsFor(name)}</span><div><strong>{name}</strong><small>{email}</small></div></div>
             <div className={p.identityDivider}/>
-            <div className={p.pointsCount}>{rewards.points}<small>DEMO REWARD POINTS</small></div>
+            <div className={p.pointsCount}>{rewards.points}<small>AVAILABLE POINTS</small></div>
             <div className={p.pointsBar}><span style={{ width: `${percent}%` }} /></div>
-            <p>{Math.max(0, nextRewardPoints - rewards.points)} points to preview the first reward tier</p>
-            <Link className={p.identityLink} href="/customer/rewards">View demo rewards <ArrowRight size={14}/></Link>
+            <p>{Math.max(0, nextRewardPoints - rewards.points)} points until your next reward</p>
+            <Link className={p.identityLink} href="/customer/rewards">View Rewards <ArrowRight size={14}/></Link>
           </section>
           <section className={p.card}>
             <div className={p.cardTitle}><h2><CalendarClock size={18}/> Pickup preferences</h2></div>
@@ -117,30 +117,30 @@ export function CustomerProfile({ email }: { email: string }) {
         </div>
         <div className={p.mainColumn}>
           <div className={p.stats}>
-            <div className={p.statCard}><small>Demo orders this month</small><strong>{thisMonth}</strong><span><ShoppingBag size={14}/> Browser history</span></div>
-            <div className={p.statCard}><small>Completed demo orders</small><strong>{rewards.completed}</strong><span><ClipboardList size={14}/> Simulated pickups</span></div>
-            <div className={p.statCard}><small>Favorite sample shops</small><strong>{favorites.length}</strong><span><Heart size={14}/> Saved on this device</span></div>
+            <div className={p.statCard}><small>Orders This Month</small><strong>{thisMonth}</strong><span><ShoppingBag size={14}/> Order history</span></div>
+            <div className={p.statCard}><small>Completed Orders</small><strong>{rewards.completed}</strong><span><ClipboardList size={14}/> Completed pickups</span></div>
+            <div className={p.statCard}><small>Favorite Shops</small><strong>{favorites.length}</strong><span><Heart size={14}/> Saved on this device</span></div>
           </div>
           <section className={p.card}>
             <div className={p.cardTitle}><h2><ShoppingBag size={18}/> Recent orders</h2><Link href="/customer/orders">View all <ArrowRight size={14}/></Link></div>
-            {!loaded ? <p className={p.muted}>Loading demo history…</p> : orders.length === 0 ? <div className={p.emptyState}><ShoppingBag size={25}/><strong>No demo orders yet</strong><span>Visit Discover to create a sample order.</span><Link href="/customer">Browse shops <ArrowRight size={14}/></Link></div> : <div className={p.tableWrap}><table className={p.ordersTable}><thead><tr><th>REFERENCE</th><th>SHOP</th><th>PLACED</th><th>TOTAL</th><th>STATUS</th><th> </th></tr></thead><tbody>{orders.slice(0, 5).map(order => <tr key={order.id}><td>{order.id}</td><td>{shops.find(shop => shop.id === order.shopId)?.name || "Sample shop"}</td><td>{formattedOrderDate(order.createdAt)}</td><td>{peso(order.total)}</td><td><span className={p.statusChip}>{trackingSteps[progressFor(order).step].label}</span></td><td><Link href={`/customer/orders/${encodeURIComponent(order.id)}`}>Track</Link></td></tr>)}</tbody></table></div>}
+            {!loaded ? <p className={p.muted}>Loading order history…</p> : orders.length === 0 ? <div className={p.emptyState}><ShoppingBag size={25}/><strong>No Orders Yet</strong><span>Find a shop and start your first order.</span><Link href="/customer">Browse shops <ArrowRight size={14}/></Link></div> : <div className={p.tableWrap}><table className={p.ordersTable}><thead><tr><th>REFERENCE</th><th>SHOP</th><th>PLACED</th><th>TOTAL</th><th>STATUS</th><th> </th></tr></thead><tbody>{orders.slice(0, 5).map(order => <tr key={order.id}><td>{order.id}</td><td>{shops.find(shop => shop.id === order.shopId)?.name || "Shop unavailable"}</td><td>{formattedOrderDate(order.createdAt)}</td><td>{peso(order.total)}</td><td><span className={p.statusChip}>{trackingSteps[progressFor(order).step].label}</span></td><td><Link href={`/customer/orders/${encodeURIComponent(order.id)}`}>Track</Link></td></tr>)}</tbody></table></div>}
           </section>
           <div className={p.twoCards}>
             <section className={p.card}>
               <div className={p.cardTitle}><h2><Heart size={18}/> Favorite shops</h2><Link href="/customer">Discover more <ArrowRight size={14}/></Link></div>
-              {!loaded ? <p className={p.muted}>Loading saved shops…</p> : favoriteShops.length === 0 ? <div className={p.emptyState}><Heart size={25}/><strong>No favorites yet</strong><span>Tap the heart on a Discover shop card to save it.</span></div> : <div className={p.favoriteList}>{favoriteShops.map(shop => <div className={p.favoriteRow} key={shop.id}><Link href={`/customer/shops/${shop.id}`}><Image src={shop.image} alt={shop.name} width={58} height={56}/></Link><div><Link href={`/customer/shops/${shop.id}`}>{shop.name}</Link><small>{shop.types} · ★ {shop.rating.toFixed(1)} sample</small></div><button aria-label={`Remove ${shop.name} from favorites`} title="Remove favorite" type="button" onClick={() => onFavorite(shop.id)}><Heart size={17} fill="currentColor"/></button></div>)}</div>}
+              {!loaded ? <p className={p.muted}>Loading saved shops…</p> : favoriteShops.length === 0 ? <div className={p.emptyState}><Heart size={25}/><strong>No favorites yet</strong><span>Tap the heart on a Discover shop card to save it.</span></div> : <div className={p.favoriteList}>{favoriteShops.map(shop => <div className={p.favoriteRow} key={shop.id}><Link href={`/customer/shops/${shop.id}`}><Image src={shop.image} alt={shop.name} width={58} height={56}/></Link><div><Link href={`/customer/shops/${shop.id}`}>{shop.name}</Link><small>{shop.types} · ★ {shop.rating.toFixed(1)}</small></div><button aria-label={`Remove ${shop.name} from favorites`} title="Remove favorite" type="button" onClick={() => onFavorite(shop.id)}><Heart size={17} fill="currentColor"/></button></div>)}</div>}
             </section>
             <section className={p.card}>
               <div className={p.cardTitle}><h2><Gift size={18}/> Rewards</h2><Link href="/customer/rewards">Explore <ArrowRight size={14}/></Link></div>
-              <p className={p.eyebrow}>NEXT SAMPLE REWARD</p><h3 className={p.rewardTitle}>Free size upgrade</h3><p className={p.muted}>Preview unlocks at 50 demo points. No actual reward can be redeemed.</p>
+              <p className={p.eyebrow}>NEXT REWARD</p><h3 className={p.rewardTitle}>Free size upgrade</h3><p className={p.muted}>A size upgrade unlocks at 50 points.</p>
               <div className={p.progressBar}><span style={{width:`${percent}%`}}/></div>
-              <p className={p.progressText}>{rewards.points} / {nextRewardPoints} example points</p>
-              <div className={p.rewardNote}><ShieldCheck size={16}/> Demo points are calculated only from completed browser orders.</div>
+              <p className={p.progressText}>{rewards.points} / {nextRewardPoints} points</p>
+              <div className={p.rewardNote}><ShieldCheck size={16}/> Points are calculated from completed orders.</div>
             </section>
           </div>
         </div>
       </div>
-      <p className={p.bottomDisclaimer}><Coffee size={14}/> Browser demo profiles and order history are not secured customer records. Real profile data and rewards rules will require PostgreSQL and server authorization.</p>
+      <p className={p.bottomDisclaimer}><Coffee size={14}/> Test mode: Preferences, favorites, and order history are saved on this device. Real customer data and rewards will be connected securely later.</p>
     </main>
   </div>;
 }

@@ -25,13 +25,13 @@ export function CartPage({ email }: { email: string }) {
   return <div className={s.page}>
     <CustomerNav email={email}/>
     <main className={s.container}>
-      <div className={s.demoNotice}>FRONTEND PREVIEW <span>Cart contents are stored in your browser only. No purchase has been made.</span></div>
+      
       <Link className={s.backLink} href={shop ? `/customer/shops/${shop.id}` : "/customer"}><ArrowLeft size={15}/> {shop ? `Back to ${shop.name}` : "Back to Discover"}</Link>
       <div className={c.heading}><p className={c.kicker}>YOUR CART</p><h1>Review your order</h1><p>Adjust your favorites before choosing a pickup time.</p></div>
-      {!loaded ? <section className={c.emptyCard}>Loading your sample cart…</section> : !count || !shop ? <section className={c.emptyCard}><ShoppingBag size={38}/><h2>Your cart is empty</h2><p>Browse a participating sample shop and add your favorite drinks or snacks.</p><Link className={c.primaryButton} href="/customer#browse">Discover shops</Link></section> :
+      {!loaded ? <section className={c.emptyCard}>Loading your cart…</section> : !count || !shop ? <section className={c.emptyCard}><ShoppingBag size={38}/><h2>Your cart is empty</h2><p>Browse shops and add your favorite drinks or snacks.</p><Link className={c.primaryButton} href="/customer#browse">Discover shops</Link></section> :
       <div className={c.layout}>
         <section className={c.card}>
-          <div className={c.cardTitle}><ShoppingBag className={c.cardTitleIcon}/><div><h2>{shop.name}</h2><p>{count} item{count === 1 ? "" : "s"} in your sample cart. One shop per order.</p></div></div>
+          <div className={c.cardTitle}><ShoppingBag className={c.cardTitleIcon}/><div><h2>{shop.name}</h2><p>{count} item{count === 1 ? "" : "s"} in your cart. One shop per order.</p></div></div>
           {lines.map(p => <div className={c.productRow} key={p.id}>
             <Image src={p.image} alt={p.name} className={c.productImage} width={74} height={74}/>
             <div className={c.productText}><h3>{p.name}</h3><small>{p.description}</small><strong>{peso(p.price * p.quantity)}</strong></div>
@@ -46,11 +46,11 @@ export function CartPage({ email }: { email: string }) {
         <aside className={`${c.card} ${c.summary}`}>
           <div className={c.cardTitle}><ShoppingBag className={c.cardTitleIcon}/><div><h2>Order summary</h2><p>{shop.name}</p></div></div>
           <div className={c.summaryLine}><span>Items</span><strong>{count}</strong></div>
-          <div className={c.summaryLine}><span>Sample subtotal</span><strong>{peso(subtotal)}</strong></div>
+          <div className={c.summaryLine}><span>Subtotal</span><strong>{peso(subtotal)}</strong></div>
           <div className={c.rule}/>
           <div className={c.summaryTotal}><span>Subtotal</span><strong>{peso(subtotal)}</strong></div>
           <Link href="/customer/checkout" className={c.primaryButton}>Continue to checkout →</Link>
-          <p className={c.muted}>This is a frontend simulation. You will review a sample service fee and pickup window on the next page.</p>
+          <p className={c.muted}>Your cart is saved on this device. Pickup details are reviewed at checkout.</p>
         </aside>
       </div>}
     </main>

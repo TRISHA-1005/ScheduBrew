@@ -178,3 +178,8 @@
 @media(prefers-reduced-motion:reduce){
   .page *, .page *::before, .page *::after{animation-duration:.01ms!important;transition-duration:.01ms!important;scroll-behavior:auto!important}
 }
+
+/* Customer Portal Finalization: accessible View All action. */
+.sectionTitle .viewAllButton{display:inline-flex;align-items:center;gap:5px;border:0;padding:5px 3px;background:transparent;color:var(--orange);font-size:12px;font-weight:800;cursor:pointer;white-space:nowrap}
+.sectionTitle .viewAllButton:hover{text-decoration:underline}
+.sectionTitle .viewAllButton:focus-visible{outline:2px solid var(--orange);outline-offset:3px;border-radius:4px}

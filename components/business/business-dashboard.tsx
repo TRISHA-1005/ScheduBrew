@@ -229,8 +229,8 @@ export function BusinessDashboard({ email }: { email: string }) {
                 <Icon size={18} aria-hidden="true" /><span>{item.label}</span>
               </Link>
             ) : (
-              item.batch === 2 || item.batch === 3 || item.batch === 4 || item.batch === 5 ? (
-                <Link key={item.label} className={s.sideItem} href={item.batch === 2 ? "/business/orders" : item.batch === 3 ? "/business/pickup-schedule" : item.batch === 4 ? "/business/menu" : "/business/customers"} onClick={() => setMenuOpen(false)}>
+              item.batch === 2 || item.batch === 3 || item.batch === 4 || item.batch === 5 || item.batch === 6 ? (
+                <Link key={item.label} className={s.sideItem} href={item.batch === 2 ? "/business/orders" : item.batch === 3 ? "/business/pickup-schedule" : item.batch === 4 ? "/business/menu" : item.batch === 5 ? "/business/customers" : "/business/analytics"} onClick={() => setMenuOpen(false)}>
                   <Icon size={18} aria-hidden="true" /><span>{item.label}</span>
                 </Link>
               ) : (
@@ -321,7 +321,7 @@ export function BusinessDashboard({ email }: { email: string }) {
             </section>
             <section className={`${s.panel} ${s.popularPanel}`} aria-labelledby="popular-heading"><div className={s.panelHead}><div><h2 id="popular-heading">Top items today</h2><p>Sample quantities sold</p></div></div><div className={s.popularList}>{popularItems.map((item, index) => <div key={item.name}><span><b>{index + 1}.</b> {item.name}</span><strong>{item.count}</strong></div>)}</div></section>
           </div>
-          <div className={s.footerLine}><span>© ScheduBrew by The Ready Counter · Business frontend prototype</span><span>Next: Batch 3 · Pickup Schedule</span></div>
+          <div className={s.footerLine}><span>© ScheduBrew by The Ready Counter · Business frontend prototype</span><span>Current module: Dashboard · Frontend prototype</span></div>
         </main>
       </div>
 

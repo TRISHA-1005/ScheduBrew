@@ -229,8 +229,8 @@ export function BusinessDashboard({ email }: { email: string }) {
                 <Icon size={18} aria-hidden="true" /><span>{item.label}</span>
               </Link>
             ) : (
-              item.batch === 2 || item.batch === 3 ? (
-                <Link key={item.label} className={s.sideItem} href={item.batch === 2 ? "/business/orders" : "/business/pickup-schedule"} onClick={() => setMenuOpen(false)}>
+              item.batch === 2 || item.batch === 3 || item.batch === 4 ? (
+                <Link key={item.label} className={s.sideItem} href={item.batch === 2 ? "/business/orders" : item.batch === 3 ? "/business/pickup-schedule" : "/business/menu"} onClick={() => setMenuOpen(false)}>
                   <Icon size={18} aria-hidden="true" /><span>{item.label}</span>
                 </Link>
               ) : (

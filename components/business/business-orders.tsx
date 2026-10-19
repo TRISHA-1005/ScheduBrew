@@ -25,7 +25,7 @@ const nav = [
   { name: "Dashboard", icon: LayoutDashboard, href: "/business", batch: 1 },
   { name: "Orders", icon: ClipboardList, href: "/business/orders", batch: 2 },
   { name: "Pickup Schedule", icon: CalendarClock, href: "/business/pickup-schedule", batch: 3 },
-  { name: "Menu", icon: Coffee, href: "", batch: 4 },
+  { name: "Menu", icon: Coffee, href: "/business/menu", batch: 4 },
   { name: "Customers", icon: UsersRound, href: "", batch: 5 },
   { name: "Analytics", icon: BarChart3, href: "", batch: 6 },
   { name: "Settings", icon: Settings, href: "", batch: 7 },

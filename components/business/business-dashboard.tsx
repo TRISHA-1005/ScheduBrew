@@ -35,11 +35,11 @@ const stages: Array<{ key: DemoOrderStatus; label: string; className: string }> 
 ];
 
 const followingStage: Record<DemoOrderStatus, DemoOrderStatus | null> = {
-  queued: "preparing", preparing: "ready", ready: "collected", collected: null,
+  queued: "preparing", preparing: "ready", ready: "collected", collected: null, cancelled: null,
 };
 
 const statusLabels: Record<DemoOrderStatus, string> = {
-  queued: "Queued", preparing: "Preparing", ready: "Ready for pickup", collected: "Picked up",
+  queued: "Queued", preparing: "Preparing", ready: "Ready for pickup", collected: "Picked up", cancelled: "Cancelled",
 };
 
 function initials(email: string): string {
@@ -136,7 +136,7 @@ export function BusinessDashboard({ email }: { email: string }) {
   const ownerName = handle.length > 0 && handle.length <= 14
     ? handle.charAt(0).toUpperCase() + handle.slice(1)
     : "Partner";
-  const activeCount = orders.filter(o => o.status !== "collected").length;
+  const activeCount = orders.filter(o => o.status !== "collected" && o.status !== "cancelled").length;
   const pendingCount = orders.filter(o => o.status === "queued").length;
   const maxLoad = Math.max(0, ...slots.map(slot => Math.round((slot.booked / slot.capacity) * 100)));
 
@@ -229,9 +229,15 @@ export function BusinessDashboard({ email }: { email: string }) {
                 <Icon size={18} aria-hidden="true" /><span>{item.label}</span>
               </Link>
             ) : (
-              <button key={item.label} type="button" className={s.sideItem} onClick={() => { setMenuOpen(false); setNotice(`${item.label} will be developed in Business Owner Batch ${item.batch}.`); }} title={`Coming in Batch ${item.batch}`}>
-                <Icon size={18} aria-hidden="true" /><span>{item.label}</span><small>Later</small>
-              </button>
+              item.batch === 2 || item.batch === 3 ? (
+                <Link key={item.label} className={s.sideItem} href={item.batch === 2 ? "/business/orders" : "/business/pickup-schedule"} onClick={() => setMenuOpen(false)}>
+                  <Icon size={18} aria-hidden="true" /><span>{item.label}</span>
+                </Link>
+              ) : (
+                <button key={item.label} type="button" className={s.sideItem} onClick={() => { setMenuOpen(false); setNotice(`${item.label} will be developed in Business Owner Batch ${item.batch}.`); }} title={`Coming in Batch ${item.batch}`}>
+                  <Icon size={18} aria-hidden="true" /><span>{item.label}</span><small>Later</small>
+                </button>
+              )
             );
           })}
         </nav>
@@ -276,7 +282,7 @@ export function BusinessDashboard({ email }: { email: string }) {
           <div className={s.operationalGrid}>
             <section className={`${s.panel} ${s.queuePanel}`} aria-labelledby="queue-heading" id="business-demo-queue">
               <div className={s.panelHead}>
-                <div><h2 id="queue-heading">Live order queue <span className={s.sampleSuffix}>(preview)</span></h2><p>Click a sample order to view details or advance its stage.</p></div>
+                <div><h2 id="queue-heading">Live order queue <span className={s.sampleSuffix}>(preview)</span></h2><p>Click an order to view details or advance its stage. Open Orders for full management.</p></div>
                 <span className={s.countPill}>{activeCount} sample active</span>
               </div>
               <div className={s.queueFilters} aria-label="Filter order queue">
@@ -294,7 +300,7 @@ export function BusinessDashboard({ email }: { email: string }) {
                   </div>;
                 })}
               </div>
-              <p className={s.panelFootnote}>This queue is a separate business simulation. It does not read customers’ Batch 3 demo receipts.</p>
+              <p className={s.panelFootnote}>This queue shares its sample order state with the <Link href="/business/orders">Orders module</Link>. It does not read real customer transactions.</p>
             </section>
 
             <section className={`${s.panel} ${s.pickupPanel}`} aria-labelledby="slot-heading">
@@ -315,7 +321,7 @@ export function BusinessDashboard({ email }: { email: string }) {
             </section>
             <section className={`${s.panel} ${s.popularPanel}`} aria-labelledby="popular-heading"><div className={s.panelHead}><div><h2 id="popular-heading">Top items today</h2><p>Sample quantities sold</p></div></div><div className={s.popularList}>{popularItems.map((item, index) => <div key={item.name}><span><b>{index + 1}.</b> {item.name}</span><strong>{item.count}</strong></div>)}</div></section>
           </div>
-          <div className={s.footerLine}><span>© ScheduBrew by The Ready Counter · Business frontend prototype</span><span>Next: Batch 2 · Order Management</span></div>
+          <div className={s.footerLine}><span>© ScheduBrew by The Ready Counter · Business frontend prototype</span><span>Next: Batch 3 · Pickup Schedule</span></div>
         </main>
       </div>
 

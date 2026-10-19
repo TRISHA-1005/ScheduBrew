@@ -4,7 +4,7 @@
  * IMPORTANT: This must never be used to enforce merchant access or order fulfillment.
  */
 
-export type DemoOrderStatus = "queued" | "preparing" | "ready" | "collected";
+export type DemoOrderStatus = "queued" | "preparing" | "ready" | "collected" | "cancelled";
 
 export type BusinessDemoOrder = {
   id: string;
@@ -87,7 +87,7 @@ export function safeWriteJson(key: string, value: unknown): boolean {
 }
 
 export function isDemoStatus(value: unknown): value is DemoOrderStatus {
-  return value === "queued" || value === "preparing" || value === "ready" || value === "collected";
+  return value === "queued" || value === "preparing" || value === "ready" || value === "collected" || value === "cancelled";
 }
 
 export function readExtraOrders(): BusinessDemoOrder[] {

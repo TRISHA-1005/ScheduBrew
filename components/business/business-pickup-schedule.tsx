@@ -9,10 +9,14 @@ import {
   UsersRound, X, Plus, Ban,
 } from "lucide-react";
 import { Logout } from "@/components/schedu/logout";
+import { BusinessShopDetails } from "./business-shop-details";
 import {
-  BUSINESS_CAPACITY_STORAGE, BUSINESS_ORDER_STORAGE, BUSINESS_STATUS_STORAGE,
+  BUSINESS_CHANGED_EVENT, BUSINESS_CAPACITY_STORAGE, BUSINESS_ORDER_STORAGE, BUSINESS_STATUS_STORAGE,
   readDemoSlots, safeWriteJson, type BusinessDemoOrder, type DemoPickupSlot,
 } from "./demo-business-data";
+import {
+  getBusinessHoursForDate, isPickupSlotWithinHours, readBusinessSettings,
+} from "./business-settings-data";
 import {
   addDays, buildSchedule, dateKey, localDate, readAllOwnerOrders,
   readPickupBlocks, readPickupRules, readableDate, savePickupBlocks,
@@ -29,7 +33,7 @@ const nav = [
   { name: "Menu", icon: Coffee, href: "/business/menu", batch: 4 },
   { name: "Customers", icon: UsersRound, href: "/business/customers", batch: 5 },
   { name: "Analytics", icon: BarChart3, href: "/business/analytics", batch: 6 },
-  { name: "Settings", icon: Settings, href: "", batch: 8 },
+  { name: "Settings", icon: Settings, href: "/business/settings", batch: 8 },
 ] as const;
 
 const statusNames: Record<BusinessDemoOrder["status"], string> = {
@@ -61,6 +65,7 @@ export function BusinessPickupSchedule({ email }: { email: string }) {
   const [blockReason, setBlockReason] = useState("Equipment maintenance");
   const [adjustTime, setAdjustTime] = useState<string | null>(null);
   const [adjustCapacity, setAdjustCapacity] = useState(25);
+  const [businessHours, setBusinessHours] = useState(readBusinessSettings().operatingHours);
 
   useEffect(() => {
     const iso = dateKey(new Date());
@@ -69,6 +74,7 @@ export function BusinessPickupSchedule({ email }: { email: string }) {
     const load = () => {
       setOrders(readAllOwnerOrders());
       setCapacitySlots(readDemoSlots());
+      setBusinessHours(readBusinessSettings().operatingHours);
       setBlocks(readPickupBlocks());
       const r = readPickupRules();
       setRules(r);
@@ -79,7 +85,8 @@ export function BusinessPickupSchedule({ email }: { email: string }) {
     setHydrated(true);
     window.addEventListener("storage", load);
     window.addEventListener("focus", load);
-    return () => { window.removeEventListener("storage", load); window.removeEventListener("focus", load); };
+    window.addEventListener(BUSINESS_CHANGED_EVENT, load);
+    return () => { window.removeEventListener("storage", load); window.removeEventListener("focus", load); window.removeEventListener(BUSINESS_CHANGED_EVENT, load); };
   }, []);
 
   useEffect(() => {
@@ -91,24 +98,45 @@ export function BusinessPickupSchedule({ email }: { email: string }) {
     return () => window.removeEventListener("keydown", onKeydown);
   }, [mobileMenu, blockTime, adjustTime]);
 
-  const slots = useMemo(() => selectedDate && today
+  const baseSlots = useMemo(() => selectedDate && today
     ? buildSchedule(selectedDate, today, orders, capacitySlots, blocks, rules)
     : [], [selectedDate, today, orders, capacitySlots, blocks, rules]);
+  const slots = useMemo(() => {
+    if (!selectedDate) return baseSlots;
+    const hours = getBusinessHoursForDate(selectedDate, businessHours);
+    return baseSlots.map(row => {
+      if (isPickupSlotWithinHours(selectedDate, row.label, businessHours)) return row;
+      return { ...row, outsideOperatingHours: true, blockedReason: hours.closed ? "Business closed" : "Outside operating hours" };
+    });
+  }, [baseSlots, selectedDate, businessHours]);
   const weekDays = useMemo(() => selectedDate
     ? Array.from({ length: 7 }, (_, i) => addDays(weekStart(selectedDate), i))
     : [], [selectedDate]);
-  const daySummaries = useMemo(() => weekDays.map(day => ({
-    day, slots: buildSchedule(day, today, orders, capacitySlots, blocks, rules),
-  })), [weekDays, today, orders, capacitySlots, blocks, rules]);
+  const daySummaries = useMemo(() => weekDays.map(day => {
+    const hours = getBusinessHoursForDate(day, businessHours);
+    const daySlots = buildSchedule(day, today, orders, capacitySlots, blocks, rules).map(row => {
+      if (isPickupSlotWithinHours(day, row.label, businessHours)) return row;
+      return { ...row, outsideOperatingHours: true, blockedReason: hours.closed ? "Business closed" : "Outside operating hours" };
+    });
+    return { day, slots: daySlots };
+  }), [weekDays, today, orders, capacitySlots, blocks, rules, businessHours]);
   const bookedTotal = slots.reduce((sum, item) => sum + item.booked, 0);
   const blockedTotal = slots.filter(item => item.blockedReason).length;
   const peakSlot = slots.reduce<typeof slots[number] | null>((peak, slot) => (!peak || slot.booked > peak.booked ? slot : peak), null);
   const visibleOrders = slots.reduce((sum, slot) => sum + slot.orderCards.length, 0);
   const invalidSelectedDate = !hydrated || !selectedDate;
 
+  function isPickupSlotOutsideHours(row: (typeof slots)[number]): boolean {
+    return "outsideOperatingHours" in row && row.outsideOperatingHours === true;
+  }
+
   function showBlockDialog(time: string) {
     const row = slots.find(slot => slot.label === time);
     if (!row) return;
+    if (isPickupSlotOutsideHours(row)) {
+      setNotice(`${time} is unavailable under the saved business operating hours. Update hours in Settings to change availability.`);
+      return;
+    }
     if (row.booked > 0) {
       setNotice(`Cannot block ${time}: it already has ${row.booked} illustrative bookings. Clear bookings in the real backend before blocking an occupied slot.`);
       return;
@@ -223,7 +251,7 @@ export function BusinessPickupSchedule({ email }: { email: string }) {
         <header className={shell.topbar}>
           <div className={shell.topLeft}>
             <button type="button" className={shell.mobileMenu} onClick={() => setMobileMenu(true)} aria-label="Open business navigation"><Menu size={21}/></button>
-            <div><strong>Brewed Awakenings</strong><span>Pasig City Main Branch · Test shop</span></div>
+            <BusinessShopDetails />
           </div>
           <div className={shell.topRight}>
             <span className={shell.datePill}><CalendarClock size={14}/>{today ? readableDate(today, false) : "Today"}</span>
@@ -246,7 +274,7 @@ export function BusinessPickupSchedule({ email }: { email: string }) {
           <div className={s.overview} aria-label="Selected day overview">
             <div><span>Bookings shown</span><strong>{bookedTotal}</strong><small>Includes example baseline</small></div>
             <div><span>Open windows</span><strong>{slots.filter(slot => !slot.blockedReason && slot.remaining > 0).length}</strong><small>Out of {TIME_LABELS.length} windows</small></div>
-            <div><span>Blocked windows</span><strong>{blockedTotal}</strong><small>Saved on this browser</small></div>
+            <div><span>Unavailable windows</span><strong>{blockedTotal}</strong><small>Saved on this browser</small></div>
             <div><span>Visible order cards</span><strong>{visibleOrders}</strong><small>From your Orders module</small></div>
           </div>
 
@@ -268,26 +296,26 @@ export function BusinessPickupSchedule({ email }: { email: string }) {
                   return <div key={row.label} className={`${s.slotRow} ${row.blockedReason ? s.blockedRow : ""} ${pct >= 90 ? s.busyRow : ""}`}>
                     <time className={s.slotTime}>{row.label}</time>
                     <div className={s.slotContent}>
-                      <div className={s.slotTop}><span className={s.slotHeading}>{row.blockedReason ? <><Lock size={13}/> Blocked: {row.blockedReason}</> : row.booked === 0 ? "Open capacity" : `${row.booked} of ${row.capacity} bookings`}</span><span className={s.slotCapacity}>{row.blockedReason ? "Unavailable" : full ? "Full" : `${row.remaining} left`}</span></div>
+                      <div className={s.slotTop}><span className={s.slotHeading}>{isPickupSlotOutsideHours(row) ? <><Lock size={13}/> Unavailable: {row.blockedReason}</> : row.blockedReason ? <><Lock size={13}/> Blocked: {row.blockedReason}</> : row.booked === 0 ? "Open capacity" : `${row.booked} of ${row.capacity} bookings`}</span><span className={s.slotCapacity}>{row.blockedReason ? "Unavailable" : full ? "Full" : `${row.remaining} left`}</span></div>
                       {!row.blockedReason && <div className={s.progressTrack} role="progressbar" aria-label={`${row.label} load`} aria-valuemin={0} aria-valuemax={100} aria-valuenow={pct}><div style={{ width: `${pct}%` }}/></div>}
                       {row.orderCards.length > 0 && <div className={s.orderChips}>{row.orderCards.map(order => <Link href="/business/orders" key={order.id} className={s.orderChip} title={`See ${order.id} in Orders`}>{order.id} · {order.quantity} item{order.quantity > 1 ? "s" : ""} <span>{statusNames[order.status]}</span></Link>)}</div>}
                       {row.booked > row.orderCards.length && !row.blockedReason && <p className={s.mutedHint}>Other bookings are illustrative baseline data.</p>}
                     </div>
-                    <div className={s.rowActions}>{row.blockedReason ? <button className={s.unblockButton} type="button" onClick={() => unblock(row.label)}>Unblock</button> : <button className={s.smallButton} type="button" onClick={() => showBlockDialog(row.label)} disabled={row.booked > 0} title={row.booked > 0 ? "Cannot block a booked sample slot" : "Block this time"}><Ban size={13}/> Block</button>}
+                    <div className={s.rowActions}>{isPickupSlotOutsideHours(row) ? <span className={s.mutedHint}>Hours rule</span> : row.blockedReason ? <button className={s.unblockButton} type="button" onClick={() => unblock(row.label)}>Unblock</button> : <button className={s.smallButton} type="button" onClick={() => showBlockDialog(row.label)} disabled={row.booked > 0} title={row.booked > 0 ? "Cannot block a booked sample slot" : "Block this time"}><Ban size={13}/> Block</button>}
                       {row.id && selectedDate === today && !row.blockedReason && <button className={s.smallButton} type="button" onClick={() => openAdjust(row.label)}><SlidersHorizontal size={13}/> Capacity</button>}</div>
                   </div>;
                 })}
               </div> : <div className={s.weekGrid}>
                 {daySummaries.map(({ day, slots: weekSlots }) => {
                   const total = weekSlots.reduce((sum, row) => sum + row.booked, 0);
-                  const blocked = weekSlots.filter(row => row.blockedReason).length;
+                  const unavailable = weekSlots.filter(row => row.blockedReason).length;
                   const ratio = Math.round(100 * total / Math.max(1, weekSlots.reduce((sum, row) => sum + row.capacity, 0)));
                   return <button key={day} type="button" className={`${s.weekDay} ${day === today ? s.weekToday : ""}`} onClick={() => { setSelectedDate(day); setView("day"); }}>
                     <span>{localDate(day).toLocaleDateString("en-PH", { weekday: "short" })}</span>
                     <strong>{localDate(day).getDate()}</strong>
                     <span>{total} shown bookings</span>
                     <div className={s.weekBar}><div style={{ width: `${Math.min(ratio,100)}%` }}/></div>
-                    <small>{blocked ? `${blocked} blocked` : "View schedule"}</small>
+                    <small>{unavailable ? `${unavailable} unavailable` : "View schedule"}</small>
                   </button>;
                 })}
               </div>}
@@ -312,7 +340,7 @@ export function BusinessPickupSchedule({ email }: { email: string }) {
                   <div><dt>Booked slots</dt><dd>{bookedTotal} shown</dd></div>
                   <div><dt>Open windows</dt><dd>{slots.filter(slot => !slot.blockedReason && slot.remaining > 0).length}/{TIME_LABELS.length}</dd></div>
                   <div><dt>Peak window</dt><dd>{peakSlot && peakSlot.booked ? peakSlot.label : "No bookings"}</dd></div>
-                  <div><dt>Blocked windows</dt><dd>{blockedTotal}</dd></div>
+                  <div><dt>Unavailable windows</dt><dd>{blockedTotal}</dd></div>
                 </dl>
                 <p className={s.helpText}>Figures above refer to the selected day, not confirmed customer bookings.</p>
               </section>

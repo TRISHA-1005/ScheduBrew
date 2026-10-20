@@ -9,6 +9,7 @@ import {
   ArrowRight, SlidersHorizontal, RotateCcw, Info,
 } from "lucide-react";
 import { Logout } from "@/components/schedu/logout";
+import { BusinessShopDetails } from "./business-shop-details";
 import {
   BUSINESS_CAPACITY_STORAGE, BUSINESS_ORDER_STORAGE, BUSINESS_STATUS_STORAGE,
   demoProducts, money, popularItems,
@@ -230,8 +231,8 @@ export function BusinessDashboard({ email }: { email: string }) {
                 <Icon size={18} aria-hidden="true" /><span>{item.label}</span>
               </Link>
             ) : (
-              item.batch === 2 || item.batch === 3 || item.batch === 4 || item.batch === 5 || item.batch === 6 ? (
-                <Link key={item.label} className={s.sideItem} href={item.batch === 2 ? "/business/orders" : item.batch === 3 ? "/business/pickup-schedule" : item.batch === 4 ? "/business/menu" : item.batch === 5 ? "/business/customers" : "/business/analytics"} onClick={() => setMenuOpen(false)}>
+              item.batch === 2 || item.batch === 3 || item.batch === 4 || item.batch === 5 || item.batch === 6 || item.batch === 8 ? (
+                <Link key={item.label} className={s.sideItem} href={item.batch === 2 ? "/business/orders" : item.batch === 3 ? "/business/pickup-schedule" : item.batch === 4 ? "/business/menu" : item.batch === 5 ? "/business/customers" : item.batch === 6 ? "/business/analytics" : "/business/settings"} onClick={() => setMenuOpen(false)}>
                   <Icon size={18} aria-hidden="true" /><span>{item.label}</span>
                 </Link>
               ) : (
@@ -253,7 +254,7 @@ export function BusinessDashboard({ email }: { email: string }) {
         <header className={s.topbar}>
           <div className={s.topLeft}>
             <button type="button" aria-label="Open business menu" className={s.mobileMenu} onClick={() => setMenuOpen(true)}><Menu size={22} /></button>
-            <div><strong>Brewed Awakenings</strong><span>Pasig City Main Branch · Sample merchant</span></div>
+            <BusinessShopDetails />
           </div>
           <div className={s.topRight}>
             <span className={s.datePill}><CalendarClock size={14} aria-hidden="true" />{dayLabel}</span>

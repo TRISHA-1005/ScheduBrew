@@ -1,0 +1,113 @@
+{
+  "batch": 8,
+  "title": "Business Settings and Subscription",
+  "route": "/business/settings",
+  "deletions": [],
+  "files": [
+    {
+      "path": "BATCH_08_README.md",
+      "action": "add",
+      "bytes": 4156,
+      "sha256": "ed3d8ffa92cc335efd751b06f991af5c44ed75d61a72447c977189a4d2054217",
+      "original_sha256": null
+    },
+    {
+      "path": "app/business/settings/page.tsx",
+      "action": "add",
+      "bytes": 898,
+      "sha256": "9fd81144d539c466c3e743245cf63214a69e28207ffb9115c2417abb9c3090b2",
+      "original_sha256": null
+    },
+    {
+      "path": "components/business/business-settings-data.ts",
+      "action": "add",
+      "bytes": 8033,
+      "sha256": "33e7abb45687332fcfc1bc7e2a1b4edfdff17857ae565bfda80aa82b8837a626",
+      "original_sha256": null
+    },
+    {
+      "path": "components/business/business-settings.tsx",
+      "action": "add",
+      "bytes": 20275,
+      "sha256": "9d1878e5046d047bde2f2b1daf827b2a08aa2de3e76dea88a83ef6b9d71335ce",
+      "original_sha256": null
+    },
+    {
+      "path": "components/business/business-shop-details.tsx",
+      "action": "add",
+      "bytes": 1074,
+      "sha256": "6b9439b77529b019dfa0ba5eec889a1009c86b1937d828141900e84adb0e3b13",
+      "original_sha256": null
+    },
+    {
+      "path": "components/business/settings.module.css",
+      "action": "add",
+      "bytes": 10220,
+      "sha256": "787cb173127e7f1b0fde96eb86a3cde3cc36ac40abd5d41a6b2baa5d2d242a51",
+      "original_sha256": null
+    },
+    {
+      "path": "components/business/business-analytics.tsx",
+      "action": "replace",
+      "bytes": 25281,
+      "sha256": "ce597a3b44e822d48dbc5db860e693277f4529041fa9a60d71af52b835ffbff5",
+      "original_sha256": "d912d55029f6057133163473583c93038b90779dc4ff3cc17af12a0108844064"
+    },
+    {
+      "path": "components/business/business-customers.tsx",
+      "action": "replace",
+      "bytes": 34409,
+      "sha256": "ab954ee8a46aa298a613687340b196af967fcaa76c5839d24f61b6dfc7ec0370",
+      "original_sha256": "c20e670807a874f35a7843f8eb728b9b84e87b0c954ccf58e42333b158e62db7"
+    },
+    {
+      "path": "components/business/business-dashboard.tsx",
+      "action": "replace",
+      "bytes": 24547,
+      "sha256": "718dfb1809f5531689b13732d2c04edfb72841cb5895716cbdc9a25326e0f5bb",
+      "original_sha256": "6a00c808e6cbf43ff4e72d59b1a7b6f10906d091b5ce62adae29314ec5e27a4a"
+    },
+    {
+      "path": "components/business/business-menu.tsx",
+      "action": "replace",
+      "bytes": 23661,
+      "sha256": "27fbf5a8dec7300db4d28a97b44d834dfd0dc3d21ce190fc4f3b22480717a480",
+      "original_sha256": "6f709624c104410f99a796a65b5b2655374ec37c02615eae82fdddb013fdda5f"
+    },
+    {
+      "path": "components/business/business-orders.tsx",
+      "action": "replace",
+      "bytes": 20446,
+      "sha256": "c82b7caec1ae202e732fd338d428b08180036097dfbc5f6e571611453847a6b4",
+      "original_sha256": "0097b286a9d85b7082586fbc24774b9c23daee0ef8eaa2a33120e8cfdccc9a4b"
+    },
+    {
+      "path": "components/business/business-pickup-schedule.tsx",
+      "action": "replace",
+      "bytes": 25145,
+      "sha256": "a5d6669c68485d19616ef70897c44d183d6920d0da1c4e59c0764d4ce216dc2a",
+      "original_sha256": "71652156a3fe8c7f7a088852f7ad59095a8e10262dbbf23256f584167157d01e"
+    },
+    {
+      "path": "scripts/check-business-batch08.mjs",
+      "action": "add",
+      "bytes": 6447,
+      "sha256": "f926f272ebc33554c01afaf5dcb1e3bdb5df2d9ab2d7c847c55bc99894fb91cd",
+      "original_sha256": null
+    },
+    {
+      "path": "docs/BATCH_08_REVIEW.md",
+      "action": "add",
+      "bytes": 2133,
+      "sha256": "198eebbb2e423f8cf577bf034137937c72ff3d4c57453e7673a1252a952a6733",
+      "original_sha256": null
+    },
+    {
+      "path": "docs/BATCH_08_VALIDATION.txt",
+      "action": "add",
+      "bytes": 684,
+      "sha256": "97d9bbafe4d0fe2de4af8e75d69361080b306e4595cc1c28524ce391838e7758",
+      "original_sha256": null
+    }
+  ]
+}

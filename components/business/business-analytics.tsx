@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { BarChart3, CalendarClock, ChevronDown, ClipboardList, Coffee, Download, LayoutDashboard, Menu, Printer, RotateCcw, Settings, ShieldCheck, UsersRound, X } from "lucide-react";
 import { Logout } from "@/components/schedu/logout";
+import { BusinessShopDetails } from "./business-shop-details";
 import shell from "./dashboard.module.css";
 import styles from "./analytics.module.css";
 import { BUSINESS_CHANGED_EVENT, BUSINESS_ORDER_STORAGE } from "./demo-business-data";
@@ -17,7 +18,7 @@ const nav = [
   { name: "Menu", icon: Coffee, href: "/business/menu", batch: 4 },
   { name: "Customers", icon: UsersRound, href: "/business/customers", batch: 5 },
   { name: "Analytics and Reports", icon: BarChart3, href: "/business/analytics", batch: 6 },
-  { name: "Settings", icon: Settings, href: "", batch: 8 },
+  { name: "Settings", icon: Settings, href: "/business/settings", batch: 8 },
 ] as const;
 const PAGE_SIZE = 10;
 const PICKUP_WINDOWS = [0, 4, 8, 12, 16, 20];
@@ -135,7 +136,7 @@ export function BusinessAnalytics({ email }: { email: string }) {
         <header className={`${shell.topbar} ${styles.noPrint}`}>
           <div className={shell.topLeft}>
             <button type="button" className={shell.mobileMenu} onClick={() => setMobileMenu(true)} aria-label="Open business navigation"><Menu size={22} /></button>
-            <div><strong>Brewed Awakenings</strong><span>Pasig City Main Branch · Test shop</span></div>
+            <BusinessShopDetails />
           </div>
           <div className={shell.topRight}>
             <span className={shell.datePill}><CalendarClock size={14} />{today}</span>

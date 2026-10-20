@@ -9,6 +9,7 @@ import {
   Sparkles, TrendingUp, UsersRound, Wallet, X,
 } from "lucide-react";
 import { Logout } from "@/components/schedu/logout";
+import { BusinessShopDetails } from "./business-shop-details";
 import { money } from "./demo-business-data";
 import {
   formatPoints, readLoyaltyMetrics, readOwnerCustomers, readOwnerRewards,
@@ -32,7 +33,7 @@ const nav = [
   { name: "Menu", icon: Coffee, href: "/business/menu", batch: 4 },
   { name: "Customers", icon: UsersRound, href: "/business/customers", batch: 5 },
   { name: "Analytics", icon: BarChart3, href: "/business/analytics", batch: 6 },
-  { name: "Settings", icon: Settings, href: "", batch: 8 },
+  { name: "Settings", icon: Settings, href: "/business/settings", batch: 8 },
 ] as const;
 
 function initials(name: string): string {
@@ -352,7 +353,7 @@ export function BusinessCustomers({ email }: { email: string }) {
         <header className={shell.topbar}>
           <div className={shell.topLeft}>
             <button type="button" className={shell.mobileMenu} onClick={() => setMobileMenu(true)} aria-label="Open business navigation"><Menu size={22} /></button>
-            <div><strong>Brewed Awakenings</strong><span>Pasig City Main Branch · Test shop</span></div>
+            <BusinessShopDetails />
           </div>
           <div className={shell.topRight}>
             <span className={shell.datePill}><CalendarClock size={14} />{new Intl.DateTimeFormat("en-PH", { year: "numeric", month: "short", day: "numeric", timeZone: "Asia/Manila" }).format(new Date())}</span>

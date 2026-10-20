@@ -1,0 +1,17 @@
+ScheduBrew Batch 8 validation summary
+
+PASS: 9 automated Batch 8 checks
+PASS: 14 included TypeScript and TSX files syntax-transpiled with zero syntax diagnostics
+PASS: business-settings-data.ts strict TypeScript check
+PASS: focused TypeScript check for the settings component and direct dependencies
+PASS: ZIP path and manifest hash validation
+
+NOT RUN: full Next.js production build using the complete application and exact locked dependencies
+NOT RUN: authenticated browser walkthrough and visual regression review
+
+Run after merging:
+  node scripts/check-business-batch08.mjs
+  npm run build
+  npm run dev
+
+Then sign in and review /business/settings and /business/pickup-schedule.

@@ -1,32 +1,39 @@
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import Link from "next/link";
+import { Brand } from "@/components/schedu/brand";
+import s from "@/components/schedu/schedu.module.css";
 
-export default function Page() {
+type SignUpSuccessProps = {
+  searchParams: Promise<{ role?: string | string[] }>;
+};
+
+export default async function SignUpSuccessPage({ searchParams }: SignUpSuccessProps) {
+  const params = await searchParams;
+  const requestedRole = Array.isArray(params.role) ? params.role[0] : params.role;
+  const isBusiness = requestedRole === "business_owner" || requestedRole === "business";
+  const signInHref = isBusiness ? "/auth/business" : "/";
+
   return (
-    <div className="flex min-h-svh w-full items-center justify-center p-6 md:p-10">
-      <div className="w-full max-w-sm">
-        <div className="flex flex-col gap-6">
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-2xl">
-                Thank you for signing up!
-              </CardTitle>
-              <CardDescription>Check your email to confirm</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm text-muted-foreground">
-                You&apos;ve successfully signed up. Please check your email to
-                confirm your account before signing in.
-              </p>
-            </CardContent>
-          </Card>
-        </div>
-      </div>
+    <div className={s.site}>
+      <header className={s.navbar}>
+        <Brand />
+        <nav className={s.navLinks} aria-label="Account navigation">
+          <Link href="/">Customer sign in</Link>
+          <Link className={s.orderButton} href="/auth/business">Business owner sign in</Link>
+        </nav>
+      </header>
+      <main className={s.signupMain}>
+        <section className={s.signupChooser}>
+          <span className={s.eyebrow}>ACCOUNT REGISTRATION</span>
+          <h1>Check your email</h1>
+          <p>
+            Your {isBusiness ? "business owner" : "customer"} account request has been submitted. If email confirmation is enabled, open the confirmation link we sent you before signing in.
+          </p>
+          <div className={s.signupSuccessActions}>
+            <Link className={s.primaryButton} href={signInHref}>Go to sign in</Link>
+            <Link href="/auth/sign-up" className={s.signupSuccessSecondary}>Create another account</Link>
+          </div>
+        </section>
+      </main>
     </div>
   );
 }

@@ -80,11 +80,8 @@ export function AuthCard({ kind }: { kind: UserKind }) {
       )}
       <p className={s.formFooter}>
         {isBusiness ? "Need a shop account?" : "New to ScheduBrew?"}{" "}
-        <Link href="/auth/sign-up">Create an account</Link>
+        <Link href={`/auth/sign-up?role=${kind}`}>Create an account</Link>
       </p>
-      {isBusiness && (
-        <p className={s.previewNote}>Business access is a frontend preview. Shop ownership and staff permissions will be enforced when we add the database roles.</p>
-      )}
     </section>
   );
 }

@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { QRCodeSVG } from "qrcode.react";
-import { ArrowLeft, ArrowRight, Check, CheckCircle2, ChevronRight, Clock3, Coffee, Copy, Info, MapPin, PackageCheck, RotateCcw, ShoppingBag, TicketCheck } from "lucide-react";
+import { ArrowLeft, ArrowRight, Check, CheckCircle2, ChevronRight, Clock3, Coffee, Copy, MapPin, PackageCheck, RotateCcw, ShoppingBag, TicketCheck } from "lucide-react";
 import { peso, products, shops } from "@/data/schedu-mock";
 import { CustomerNav } from "./customer-nav";
 import { formatSlot, readOrders, type DemoOrder } from "./demo-order-data";
@@ -50,7 +50,7 @@ export function OrderTracking({ email, reference }: { email: string; reference: 
     try {
       const result = progressTo(order, (stage + 1) as DemoStep);
       setProgress(result);
-      setStatusMessage(`Demo status changed to ${trackingSteps[result.step].label}. No merchant was notified.`);
+      setStatusMessage(`Order status changed to ${trackingSteps[result.step].label}.`);
     } catch { setStatusMessage("Browser storage was unavailable. Please try again."); }
     finally { setBusy(false); }
   }
@@ -60,8 +60,8 @@ export function OrderTracking({ email, reference }: { email: string; reference: 
     setBusy(true);
     try {
       setProgress(progressTo(order, 0));
-      setStatusMessage("Demonstration progress reset to Confirmed.");
-    } catch { setStatusMessage("Could not reset this demo in browser storage."); }
+      setStatusMessage("Order progress reset to Confirmed.");
+    } catch { setStatusMessage("Could not reset order progress. Please try again."); }
     finally { setBusy(false); }
   }
 
@@ -89,38 +89,38 @@ export function OrderTracking({ email, reference }: { email: string; reference: 
         <div className={t.mainColumn}>
           <section className={t.surface}>
             <div className={t.trackingTop}>
-              <div><span className={t.mutedLabel}>Selected pickup</span><h2 className={t.pickupTitle}>{formattedPickupDate(order.pickupDate)} · {formatSlot(order.pickupTime)}</h2><p>Actual availability has not been verified with a merchant.</p></div>
+              <div><span className={t.mutedLabel}>Selected pickup</span><h2 className={t.pickupTitle}>{formattedPickupDate(order.pickupDate)} · {formatSlot(order.pickupTime)}</h2></div>
               <div className={t.orderRef}><span>ORDER REFERENCE</span><strong>{order.id}</strong><button type="button" onClick={copyReference}><Copy size={14}/> {copyLabel}</button></div>
             </div>
             <div className={t.timeline} aria-label="Order status progression">
               {trackingSteps.map((step, i) => <div key={step.key} className={`${t.step} ${i < stage ? t.stepPassed : ""} ${i === stage ? t.stepCurrent : ""}`}>
                 <div className={t.stepMarker}>{i < stage ? <Check size={16}/> : i + 1}</div>
-                <b>{step.label}</b><small>{i <= stage ? progressTime(i) ? new Date(progressTime(i)!).toLocaleTimeString("en-PH", { hour: "numeric", minute: "2-digit" }) : "Demo update" : "Coming next"}</small>
+                <b>{step.label}</b><small>{i <= stage ? progressTime(i) ? new Date(progressTime(i)!).toLocaleTimeString("en-PH", { hour: "numeric", minute: "2-digit" }) : "Updated" : "Coming next"}</small>
               </div>)}
             </div>
             <div className={t.statusArea}><span className={`${t.status} ${stage === 3 ? t.statusDone : stage === 2 ? t.statusReady : t.statusActive}`}>{trackingSteps[stage].label}</span><p>{trackingSteps[stage].detail}</p></div>
             <div className={t.demoControls}>
-              <div><strong>Try the status simulation</strong><p>Press the button to see how order tracking will look when the shop updates an order. Nothing is transmitted to a business.</p></div>
-              <div className={t.actionGroup}><button type="button" className={t.secondaryButton} disabled={busy || stage === 0} onClick={resetDemo}><RotateCcw size={15}/> Reset</button><button type="button" className={t.primaryButton} disabled={busy || stage === 3} onClick={simulateNext}>{stage === 3 ? "Demo completed" : `Simulate: ${trackingSteps[stage + 1].label}`}<ArrowRight size={15}/></button></div>
+              <div><strong>Order progress</strong><p>Review the current status and pickup progress.</p></div>
+              <div className={t.actionGroup}><button type="button" className={t.secondaryButton} disabled={busy || stage === 0} onClick={resetDemo}><RotateCcw size={15}/> Reset</button><button type="button" className={t.primaryButton} disabled={busy || stage === 3} onClick={simulateNext}>{stage === 3 ? "Picked up" : `Update to ${trackingSteps[stage + 1].label}`}<ArrowRight size={15}/></button></div>
             </div>
             {statusMessage && <p className={t.inlineNotice} role="status">{statusMessage}</p>}
           </section>
           <div className={t.twoPanel}>
             <section className={t.surface}>
-              <div className={t.panelHeading}><Coffee size={22}/><div><h2>Preparation updates</h2><p>Examples of the notifications customers may see.</p></div></div>
+              <div className={t.panelHeading}><Coffee size={22}/><div><h2>Preparation updates</h2><p>Order status updates and preparation progress.</p></div></div>
               <div className={t.updateList}>
                 {trackingSteps.map((step, i) => <div key={step.key} className={`${t.update} ${i > stage ? t.upcomingUpdate : ""}`}><div className={t.updateIcon}>{i <= stage ? <Check size={16}/> : <Clock3 size={16}/>}</div><div><b>{step.label}</b><p>{step.detail}</p></div><small>{i <= stage ? (progressTime(i) ? new Date(progressTime(i)!).toLocaleTimeString("en-PH", {hour:"numeric",minute:"2-digit"}) : "Pending") : "Not started"}</small></div>)}
               </div>
             </section>
             <section className={t.surface}>
-              <div className={t.panelHeading}><TicketCheck size={22}/><div><h2>Your pickup pass</h2><p>Shown when the sample status is ready.</p></div></div>
+              <div className={t.panelHeading}><TicketCheck size={22}/><div><h2>Your pickup pass</h2><p>Available when the order is ready.</p></div></div>
               {stage >= 2 ? <div className={t.qrSection}>
-                <div className={t.qrWrap}><QRCodeSVG value={`SCHEDUBREW-DEMO|${order.id}|NOT-VALID-FOR-PICKUP`} size={180} level="M" title={`Demo QR code for ${order.id}`} includeMargin /></div>
-                <span className={t.qrWarning}>DEMO ONLY · NOT VALID FOR PICKUP</span>
+                <div className={t.qrWrap}><QRCodeSVG value={`SCHEDUBREW|${order.id}|NOT-VALID-FOR-PICKUP`} size={180} level="M" title={`Pickup reference QR code for ${order.id}`} includeMargin /></div>
+                <span className={t.qrWarning}>PICKUP VERIFICATION UNAVAILABLE</span>
                 <strong>{order.id}</strong>
-                <p>This QR code encodes only your demo reference. It cannot verify, redeem, or complete a real pickup.</p>
-                {stage === 3 && <div className={t.finishedNotice}><CheckCircle2 size={17}/> Demo pickup completed</div>}
-              </div> : <div className={t.qrPlaceholder}><div><PackageCheck size={42}/></div><b>Pickup pass not ready</b><p>Use “Simulate: Preparing,” then “Simulate: Ready for Pickup” to preview the QR code.</p></div>}
+                <p>Pickup verification is not available for this order yet.</p>
+                {stage === 3 && <div className={t.finishedNotice}><CheckCircle2 size={17}/> Pickup marked complete</div>}
+              </div> : <div className={t.qrPlaceholder}><div><PackageCheck size={42}/></div><b>Pickup pass not ready</b><p>The pickup pass will appear when the order is ready.</p></div>}
             </section>
           </div>
           <section className={t.locationStrip}><MapPin size={21}/><div><b>{shop?.name || "Shop unavailable"}</b><p>{shop?.location || "Location unavailable"} · Location not yet verified</p></div><Link href={`/customer/shops/${encodeURIComponent(order.shopId)}`} className={t.textButton}>View shop <ArrowRight size={15}/></Link></section>
@@ -131,10 +131,10 @@ export function OrderTracking({ email, reference }: { email: string; reference: 
             <div className={t.items}>{lines.map(p => <div key={p.id} className={t.item}><Image src={p.image} width={58} height={58} alt={p.name}/><div><b>{p.name}</b><span>Quantity: {p.quantity}</span></div><strong>{peso(p.price * p.quantity)}</strong></div>)}</div>
             <div className={t.rule}/>
             <div className={t.billRow}><span>Subtotal</span><b>{peso(order.subtotal)}</b></div>
-            <div className={t.billRow}><span>Illustrative service fee</span><b>{peso(order.demoServiceFee)}</b></div>
+            <div className={t.billRow}><span>Service fee</span><b>{peso(order.demoServiceFee)}</b></div>
             <div className={`${t.billRow} ${t.total}`}><strong>Total</strong><strong>{peso(order.total)}</strong></div>
             <div className={t.summaryDetails}><div><span>Payment selection</span><b>Pay at counter</b></div><div><span>Order created</span><b>{formattedOrderDate(order.createdAt)}</b></div><div><span>Pickup schedule</span><b>{formattedPickupDate(order.pickupDate)} · {formatSlot(order.pickupTime)}</b></div></div>
-            <div className={t.securityNote}><Info size={17}/> Orders, prices and updates shown here are stored only on this browser. No physical order was placed, no time was booked and no payment was processed.</div>
+            
           </section>
         </aside>
       </div>

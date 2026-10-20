@@ -4,7 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 import {
-  CalendarClock, CheckCircle2, ChevronDown, ChevronRight, CircleAlert,
+  CalendarClock, CheckCircle2, ChevronDown, ChevronRight,
   ClipboardList, Coffee, FileText, Filter, LayoutDashboard, Menu,
   Plus, Printer, RefreshCcw, Search, Settings, ShieldCheck,
   ShoppingBag, UsersRound, X, BarChart3,
@@ -129,7 +129,7 @@ export function BusinessOrders({ email }: { email: string }) {
     const isForward = nextStatus[order.status] === status;
     const mayCancel = status === "cancelled" && ["queued", "preparing"].includes(order.status);
     if (!isForward && !mayCancel) {
-      setNotice("That status change is not available in this demonstration.");
+      setNotice("Select the next available order status.");
       return;
     }
     if (order.source === "example") {
@@ -141,7 +141,7 @@ export function BusinessOrders({ email }: { email: string }) {
       setExtraOrders(updated);
       safeWriteJson(BUSINESS_ORDER_STORAGE, updated);
     }
-    setNotice(`${order.id} changed to ${statusNames[status]} in this browser only.`);
+    setNotice(`${order.id} changed to ${statusNames[status]}.`);
   }
 
   function createOrder(event: FormEvent<HTMLFormElement>) {
@@ -157,7 +157,7 @@ export function BusinessOrders({ email }: { email: string }) {
       createdAt: new Date().toISOString(),
       id: `WALK-${Date.now().toString(36).toUpperCase()}${Math.random().toString(36).slice(2, 5).toUpperCase()}`,
       customer, product: chosen.name, unitPrice: chosen.price, quantity,
-      pickupTime: pickup, status: "queued", source: "walk-in demo",
+      pickupTime: pickup, status: "queued", source: "walk-in",
     };
     const updated = [order, ...extraOrders].slice(0, 100);
     setExtraOrders(updated);
@@ -165,7 +165,7 @@ export function BusinessOrders({ email }: { email: string }) {
     setSelected(order.id);
     setFilter("all"); setQuery(""); setSort("recent"); setCreateOpen(false);
     setName(""); setQuantity(1);
-    setNotice(saved ? "Test order saved in this browser and shared with the Dashboard." : "Test order created for this session; browser storage is unavailable.");
+    setNotice(saved ? "Order added successfully." : "Order added for this session.");
   }
 
   function resetOrders() {
@@ -174,7 +174,7 @@ export function BusinessOrders({ email }: { email: string }) {
     safeWriteJson(BUSINESS_STATUS_STORAGE, {});
     safeWriteJson(BUSINESS_ORDER_STORAGE, []);
     setSelected("EX-0142"); setFilter("all"); setQuery(""); setSort("recent");
-    setNotice("Test orders reset to their original examples. Dashboard pickup capacity was not changed.");
+    setNotice("Orders reset. Dashboard pickup capacity was not changed.");
   }
 
   const browseEmpty = hydrated && filtered.length === 0;
@@ -191,16 +191,14 @@ export function BusinessOrders({ email }: { email: string }) {
           <button className={shell.closeSide} type="button" onClick={() => setMobileMenu(false)} aria-label="Close menu"><X size={20}/></button>
         </div>
         <nav className={shell.sideNavigation} aria-label="Business modules">
-          {nav.map(({ name, icon: Icon, href, batch }) => href ? (
+          {nav.map(({ name, icon: Icon, href, batch }) => (
             <Link key={name} href={href} className={`${shell.sideItem} ${batch === 2 ? shell.sideActive : ""}`} aria-current={batch === 2 ? "page" : undefined} onClick={() => setMobileMenu(false)}><Icon size={18}/><span>{name}</span></Link>
-          ) : (
-            <button key={name} className={shell.sideItem} type="button" onClick={() => { setMobileMenu(false); setNotice(`${name} is planned for Business Batch ${batch}.`); }}><Icon size={18}/><span>{name}</span><small>Later</small></button>
           ))}
         </nav>
         <div className={shell.sideFoot}>
           <div className={shell.sideFootTitle}><ShieldCheck size={17}/> Smart pickup control</div>
-          <p>Monitor the example queue and move orders through preparation stages.</p>
-          <span>Test workspace · Batch 2</span>
+          <p>Monitor the order queue and move orders through preparation stages.</p>
+          
         </div>
       </aside>
       <div className={shell.mainArea}>
@@ -211,7 +209,6 @@ export function BusinessOrders({ email }: { email: string }) {
           </div>
           <div className={shell.topRight}>
             <span className={shell.datePill}><CalendarClock size={14}/>{dateLabel || "Today"}</span>
-            <span className={shell.demoTopBadge}><span/> Test mode</span>
             <div className={shell.avatar} title={email} aria-label="Signed in user">{avatar(email)}</div>
             <Logout />
           </div>
@@ -221,11 +218,11 @@ export function BusinessOrders({ email }: { email: string }) {
           <div className={styles.headline}>
             <div><span className={styles.eyebrow}>ORDER MANAGEMENT</span><h1>Orders</h1><p>Organize incoming orders and move them from queue to pickup.</p></div>
             <div className={styles.headActions}>
-              <button type="button" className={styles.secondaryButton} onClick={resetOrders} disabled={!hydrated}><RefreshCcw size={16}/> Reset test orders</button>
-              <button type="button" className={styles.primaryButton} onClick={() => setCreateOpen(true)} disabled={!hydrated}><Plus size={17}/> Create test order</button>
+              <button type="button" className={styles.secondaryButton} onClick={resetOrders} disabled={!hydrated}><RefreshCcw size={16}/> Reset orders</button>
+              <button type="button" className={styles.primaryButton} onClick={() => setCreateOpen(true)} disabled={!hydrated}><Plus size={17}/> Create order</button>
             </div>
           </div>
-          <div className={styles.testNotice} role="note"><CircleAlert size={17}/><span>Test workspace. Orders and pickup times are examples saved in this browser. No customer is notified, no payment is collected, and no real pickup is reserved.</span></div>
+          
           {notice && <div className={styles.notice} role="status"><span>{notice}</span><button type="button" aria-label="Dismiss message" onClick={() => setNotice("")}><X size={16}/></button></div>}
 
           <div className={styles.ordersLayout}>
@@ -253,10 +250,10 @@ export function BusinessOrders({ email }: { email: string }) {
                     <td><button type="button" className={styles.viewButton} aria-label={`View order ${order.id}`} onClick={() => setSelected(order.id)}>View <ChevronRight size={13}/></button></td>
                   </tr>)}</tbody>
                 </table>
-                {!hydrated && <p className={styles.empty}>Loading example orders...</p>}
+                {!hydrated && <p className={styles.empty}>Loading orders...</p>}
                 {browseEmpty && <div className={styles.empty}><ShoppingBag size={28}/><strong>No orders found</strong><p>Try a different search term or status filter.</p><button className={styles.textButton} onClick={() => { setQuery(""); setFilter("all"); searchRef.current?.focus(); }}>Clear filters</button></div>}
               </div>
-              <div className={styles.tableFooter}><span>Showing {filtered.length} of {counts.all} test orders</span><span>Stored locally · Not connected to customer orders</span></div>
+              <div className={styles.tableFooter}><span>Showing {filtered.length} of {counts.all} orders</span></div>
             </section>
 
             <aside className={styles.detailPanel} aria-label="Selected order details">
@@ -264,39 +261,38 @@ export function BusinessOrders({ email }: { email: string }) {
                 <div className={styles.detailHeading}><div><strong>Order {selectedOrder.id}</strong><span>{selectedOrder.customer}</span></div><OrderStatus value={selectedOrder.status}/></div>
                 <div className={styles.productRow}>
                   {photos[selectedOrder.product] ? <Image src={photos[selectedOrder.product]} alt="" width={49} height={49} /> : <span className={styles.productIcon}><Coffee size={24}/></span>}
-                  <div><strong>{selectedOrder.product}</strong><span>{selectedOrder.quantity} item{selectedOrder.quantity === 1 ? "" : "s"} · {selectedOrder.source === "example" ? "Example order" : "Walk-in test"}</span></div>
+                  <div><strong>{selectedOrder.product}</strong><span>{selectedOrder.quantity} item{selectedOrder.quantity === 1 ? "" : "s"} · {selectedOrder.source === "example" ? "Order" : "Walk-in"}</span></div>
                   <strong>{money(selectedOrder.quantity * selectedOrder.unitPrice)}</strong>
                 </div>
-                <div className={styles.pickupBox}><span className={styles.boxTitle}>PICKUP</span><strong>{selectedOrder.pickupTime} · Example counter</strong><p>Illustrative pickup time. No reservation has been made.</p></div>
-                <div className={styles.summaryList}><div><span>Quantity</span><strong>{selectedOrder.quantity}</strong></div><div><span>Unit price</span><strong>{money(selectedOrder.unitPrice)}</strong></div><div><span>Subtotal</span><strong>{money(selectedOrder.quantity * selectedOrder.unitPrice)}</strong></div><div><span>Payment</span><strong>Not connected</strong></div></div>
+                <div className={styles.pickupBox}><span className={styles.boxTitle}>PICKUP</span><strong>{selectedOrder.pickupTime}</strong></div>
+                <div className={styles.summaryList}><div><span>Quantity</span><strong>{selectedOrder.quantity}</strong></div><div><span>Unit price</span><strong>{money(selectedOrder.unitPrice)}</strong></div><div><span>Subtotal</span><strong>{money(selectedOrder.quantity * selectedOrder.unitPrice)}</strong></div><div><span>Payment</span><strong>Pay at counter</strong></div></div>
                 <div className={styles.stageHeading}>Update order status</div>
                 <div className={styles.stageGrid}>
                   {(["queued", "preparing", "ready", "collected"] as DemoOrderStatus[]).map(status => <button key={status} type="button" aria-pressed={selectedOrder.status === status} className={selectedOrder.status === status ? styles.stageCurrent : styles.stageButton} disabled={!hydrated || (selectedOrder.status !== status && nextStatus[selectedOrder.status] !== status)} onClick={() => status !== selectedOrder.status && updateOrder(selectedOrder, status)}>{status === "collected" ? "Completed" : statusNames[status]}</button>)}
                 </div>
-                {selectedOrder.status === "cancelled" && <p className={styles.warningMessage}>This example order was cancelled. Its status cannot be advanced.</p>}
-                {selectedOrder.status === "collected" && <p className={styles.successMessage}><CheckCircle2 size={16}/> Order completed in this test workspace.</p>}
+                {selectedOrder.status === "cancelled" && <p className={styles.warningMessage}>This order was cancelled. Its status cannot be advanced.</p>}
+                {selectedOrder.status === "collected" && <p className={styles.successMessage}><CheckCircle2 size={16}/> Order completed.</p>}
                 <div className={styles.detailActions}>
-                  <Link className={styles.printButton} href={`/business/orders/${encodeURIComponent(selectedOrder.id)}/label`} target="_blank" rel="noopener noreferrer"><Printer size={16}/> Print test pickup label</Link>
-                  {(selectedOrder.status === "queued" || selectedOrder.status === "preparing") && <button type="button" className={styles.cancelButton} onClick={() => updateOrder(selectedOrder, "cancelled")}>Cancel test order</button>}
+                  <Link className={styles.printButton} href={`/business/orders/${encodeURIComponent(selectedOrder.id)}/label`} target="_blank" rel="noopener noreferrer"><Printer size={16}/> Print pickup label</Link>
+                  {(selectedOrder.status === "queued" || selectedOrder.status === "preparing") && <button type="button" className={styles.cancelButton} onClick={() => updateOrder(selectedOrder, "cancelled")}>Cancel order</button>}
                 </div>
-              </> : <div className={styles.nothingSelected}><FileText size={34}/><h2>Order details</h2><p>Select an order from the table to review its information and update its test status.</p></div>}
+              </> : <div className={styles.nothingSelected}><FileText size={34}/><h2>Order details</h2><p>Select an order from the table to review its information and update its status.</p></div>}
             </aside>
           </div>
-          <p className={styles.footer}>ScheduBrew by The Ready Counter · Business frontend prototype · Pickup Schedule arrives in Batch 3</p>
         </main>
       </div>
 
       {createOpen && <div className={styles.backdrop} onMouseDown={event => { if (event.target === event.currentTarget) setCreateOpen(false); }}>
         <section className={styles.dialog} role="dialog" aria-modal="true" aria-labelledby="create-title">
-          <div className={styles.dialogTop}><div><span className={styles.eyebrow}>LOCAL TEST ONLY</span><h2 id="create-title">Create a test order</h2></div><button aria-label="Close create order" type="button" onClick={() => setCreateOpen(false)}><X size={20}/></button></div>
-          <p>No real order will be submitted. The entry will appear in both the Orders page and the Business Dashboard.</p>
+          <div className={styles.dialogTop}><div><span className={styles.eyebrow}>ORDER ENTRY</span><h2 id="create-title">Create order</h2></div><button aria-label="Close create order" type="button" onClick={() => setCreateOpen(false)}><X size={20}/></button></div>
+          
           <form onSubmit={createOrder} className={styles.form}>
-            <label>Customer display name <input autoFocus maxLength={60} minLength={1} required value={name} onChange={event => setName(event.target.value)} placeholder="Example: Maria S."/></label>
+            <label>Customer display name <input autoFocus maxLength={60} minLength={1} required value={name} onChange={event => setName(event.target.value)} placeholder="Customer name"/></label>
             <label>Product <select value={product} onChange={event => setProduct(event.target.value)}>{demoProducts.map(item => <option value={item.name} key={item.name}>{item.name} · {money(item.price)}</option>)}</select></label>
             <div className={styles.formGrid}><label>Quantity <input type="number" min="1" max="10" step="1" value={quantity} required onChange={event => setQuantity(Number(event.target.value))}/></label>
-              <label>Example pickup time <select value={pickup} onChange={event => setPickup(event.target.value)}>{["3:20 PM", "3:40 PM", "4:00 PM", "4:20 PM", "4:40 PM"].map(time => <option key={time}>{time}</option>)}</select></label></div>
-            <div className={styles.orderPreview}>Sample total <strong>{money(quantity * (demoProducts.find(item => item.name === product)?.price ?? 0))}</strong></div>
-            <button type="submit" className={styles.primaryButton}>Add test order</button>
+              <label>Pickup time <select value={pickup} onChange={event => setPickup(event.target.value)}>{["3:20 PM", "3:40 PM", "4:00 PM", "4:20 PM", "4:40 PM"].map(time => <option key={time}>{time}</option>)}</select></label></div>
+            <div className={styles.orderPreview}>Order total <strong>{money(quantity * (demoProducts.find(item => item.name === product)?.price ?? 0))}</strong></div>
+            <button type="submit" className={styles.primaryButton}>Add order</button>
           </form>
         </section>
       </div>}

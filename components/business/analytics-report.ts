@@ -14,7 +14,7 @@ export const TREND_VIEWS: TrendView[] = ["Daily", "Weekly", "Monthly"];
 export const REPORT_STATUSES: ReportStatus[] = ["queued", "preparing", "ready", "collected", "cancelled"];
 export const STATUS_LABELS: Record<ReportStatus, string> = { queued: "Queued", preparing: "Preparing", ready: "Ready", collected: "Collected", cancelled: "Cancelled" };
 export const WEEKDAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
-export const REPORT_NOTE = "Demo data only. Collected order value is quantity × recorded unit price for collected orders, grouped by order creation date in Asia/Manila. It is not verified payment revenue and excludes fees, discounts, refunds and tax adjustments. Browser history retains at most 100 local orders; older undated orders are excluded.";
+export const REPORT_NOTE = "Collected order value is quantity × recorded unit price for collected orders, grouped by order creation date in Asia/Manila. It is not verified payment revenue and excludes fees, discounts, refunds and tax adjustments. Browser history retains at most 100 local orders; older undated orders are excluded.";
 const DAY = 86_400_000;
 
 export function isDateKey(value: string): boolean {
@@ -138,7 +138,7 @@ export type AnalyticsReport = ReturnType<typeof buildReport>;
 export function reportCsv(report: AnalyticsReport, kind: "summary" | "orders" | "products", generatedAt: string, undatedOrders = 0): string {
   const f = report.filters;
   const rows: Array<Array<string | number>> = [
-    ["ScheduBrew", "Batch 7 Analytics and Reports"], ["Data source", f.source === "sample" ? "Illustrative sample history" : "Local browser demo orders"],
+    ["ScheduBrew", "Analytics and Reports"], ["Data source", f.source === "sample" ? "Overview history" : "Local orders"],
     ["From", f.start], ["Through", f.end], ["Time zone", "Asia/Manila"], ["Status filter", f.status], ["Interval", f.interval],
     ["Generated at (UTC)", generatedAt], ["Undated local orders excluded", undatedOrders], ["Invalid or duplicate records excluded", report.excluded], ["Definition", REPORT_NOTE], [],
   ];

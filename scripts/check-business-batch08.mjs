@@ -87,12 +87,13 @@ try {
     assert.ok(source.includes("Unavailable: {row.blockedReason}"));
     assert.ok(source.includes("outsideOperatingHours"));
   });
-  check("Subscription controls remain a demo and do not request payment details", () => {
+  check("Subscription plan controls remain available without payment card fields", () => {
     const source = readFileSync(resolve(root, "components/business/business-settings.tsx"), "utf8");
-    assert.ok(source.includes("No payment details were collected"));
-    assert.ok(source.includes("no charge was made"));
     assert.ok(source.includes("Choose ${plan.name}"));
     assert.ok(!source.toLowerCase().includes("card number"));
+    assert.ok(!source.includes("Test mode"));
+    assert.ok(!source.includes("Frontend demonstration"));
+    assert.ok(!source.includes("Demo selected"));
   });
   check("New settings styles and data modules are included", () => {
     for (const file of [

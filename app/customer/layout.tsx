@@ -5,7 +5,7 @@ export const metadata: Metadata = {
     default: "Customer Portal | ScheduBrew",
     template: "%s | ScheduBrew",
   },
-  description: "ScheduBrew customer frontend preview for shop discovery, menu browsing, demonstration checkout, order tracking, profile, and rewards.",
+  description: "Discover shops, browse menus, place orders, track pickups, manage your profile, and explore rewards with ScheduBrew.",
   robots: { index: false, follow: false },
 };
 

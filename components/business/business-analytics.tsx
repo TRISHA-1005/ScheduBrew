@@ -69,7 +69,7 @@ export function BusinessAnalytics({ email }: { email: string }) {
       const raw = window.localStorage.getItem(BUSINESS_ORDER_STORAGE);
       if (raw !== null && !Array.isArray(JSON.parse(raw))) throw new Error("Invalid order storage");
       setLocal(readLocalReportOrders()); setStorageError("");
-    } catch { setLocal({ records: [], undated: 0 }); setStorageError("Local order storage is unavailable or unreadable. Local reports cannot be loaded. Sample history remains available."); }
+    } catch { setLocal({ records: [], undated: 0 }); setStorageError("Local order storage is unavailable or unreadable. Local reports cannot be loaded. Available history remains available."); }
     if (announce) setNotice("Report refreshed from the current data source.");
   }
   useEffect(() => {
@@ -115,20 +115,15 @@ export function BusinessAnalytics({ email }: { email: string }) {
           <button type="button" className={shell.closeSide} onClick={() => setMobileMenu(false)} aria-label="Close navigation"><X size={20} /></button>
         </div>
         <nav className={shell.sideNavigation} aria-label="Business modules">
-          {nav.map(({ name, icon: Icon, href, batch }) => href ? (
+          {nav.map(({ name, icon: Icon, href, batch }) => (
             <Link key={name} href={href} className={`${shell.sideItem} ${batch === 6 ? shell.sideActive : ""}`} aria-current={batch === 6 ? "page" : undefined} onClick={() => setMobileMenu(false)}>
               <Icon size={18} aria-hidden="true" /><span>{name}</span>
             </Link>
-          ) : (
-            <button key={name} type="button" className={shell.sideItem} onClick={() => { setMobileMenu(false); setNotice(`${name} is planned for Business Owner Batch ${batch}.`); }}>
-              <Icon size={18} aria-hidden="true" /><span>{name}</span><small>Later</small>
-            </button>
           ))}
         </nav>
         <div className={shell.sideFoot}>
           <div className={shell.sideFootTitle}><ShieldCheck size={17} /> Smart pickup control</div>
           <p>Balance order volume by time slot and keep the counter moving smoothly.</p>
-          <span>Frontend workspace · Batch 7</span>
         </div>
       </aside>
 
@@ -140,7 +135,6 @@ export function BusinessAnalytics({ email }: { email: string }) {
           </div>
           <div className={shell.topRight}>
             <span className={shell.datePill}><CalendarClock size={14} />{today}</span>
-            <span className={shell.demoTopBadge}><span /> Test mode</span>
             <div className={shell.avatar} title={email} aria-label={`Signed in user ${ownerName}`}>{avatarInitials(email)}</div>
             <Logout />
           </div>
@@ -148,16 +142,16 @@ export function BusinessAnalytics({ email }: { email: string }) {
 
         <main className={styles.content}>
           <div className={styles.headingRow}>
-            <div><span className={styles.eyebrow}>PERFORMANCE · BATCH 7</span><h1>Analytics and Reports</h1><p>Explore orders, product performance, and pickup demand.</p></div>
+            <div><span className={styles.eyebrow}>PERFORMANCE</span><h1>Analytics and Reports</h1><p>Explore orders, product performance, and pickup demand.</p></div>
             <div className={`${styles.headerActions} ${styles.noPrint}`}>
               <button type="button" className={styles.secondaryButton} onClick={() => refreshReport(true)}><RotateCcw size={15} /> Refresh</button>
               <button type="button" className={styles.secondaryButton} disabled={!report} onClick={() => window.print()}><Printer size={15} /> Print report</button>
             </div>
           </div>
-          <div className={styles.dataBanner}><strong>{source === "sample" ? "Illustrative sample history" : "Local browser demo orders"}</strong><span>Demo workspace. Reports do not contain live sales or verified payments. Local orders are shared by users of this browser.</span></div>
+          
           {notice && <div className={`${styles.notice} ${styles.noPrint}`} role="status"><span>{notice}</span><button type="button" aria-label="Dismiss message" onClick={() => setNotice("")}><X size={16} /></button></div>}
           <section className={`${styles.filters} ${styles.noPrint}`} aria-label="Report filters">
-            <label className={styles.periodControl}><span>Data source</span><select value={source} onChange={e => { setSource(e.target.value as ReportSource); resetPage(); }}><option value="sample">Sample history</option><option value="local">Local demo orders</option></select></label>
+            <label className={styles.periodControl}><span>Data source</span><select value={source} onChange={e => { setSource(e.target.value as ReportSource); resetPage(); }}><option value="sample">Overview</option><option value="local">Local orders</option></select></label>
             <label className={styles.periodControl}><span>Report period</span><span className={styles.selectWrap}><select value={period} aria-label="Choose analytics report period" onChange={e => { const next = e.target.value as ReportPeriod; if (next === "Custom" && range) { setCustomStart(range.start); setCustomEnd(range.end); } setPeriod(next); resetPage(); }}>{REPORT_PERIODS.map(p => <option key={p}>{p}</option>)}</select><ChevronDown size={15} /></span></label>
             <label className={styles.periodControl}><span>Order status</span><select value={status} onChange={e => { setStatus(e.target.value as typeof status); resetPage(); }}><option value="all">All statuses</option>{REPORT_STATUSES.map(s => <option key={s} value={s}>{STATUS_LABELS[s]}</option>)}</select></label>
             {period === "Custom" && <><label className={styles.periodControl}><span>Start date</span><input type="date" min="2000-01-01" value={customStart} max={today} aria-invalid={!!rangeError} aria-describedby={rangeError ? "range-error" : undefined} onChange={e => { setCustomStart(e.target.value); resetPage(); }} /></label><label className={styles.periodControl}><span>End date</span><input type="date" min="2000-01-01" value={customEnd} max={today} aria-invalid={!!rangeError} aria-describedby={rangeError ? "range-error" : undefined} onChange={e => { setCustomEnd(e.target.value); resetPage(); }} /></label></>}
@@ -170,14 +164,14 @@ export function BusinessAnalytics({ email }: { email: string }) {
             <p className={styles.rangeSummary}><strong>{report.filters.start} through {report.filters.end}</strong> · Asia/Manila · {status === "all" ? "All statuses" : STATUS_LABELS[status]} · Compared with {report.previous.start} through {report.previous.end}</p>
             {source === "local" && local.undated > 0 && <p className={styles.dataQuality}>{local.undated} older local order{local.undated === 1 ? " has" : "s have"} no creation date and {local.undated === 1 ? "is" : "are"} excluded. New orders created from Dashboard or Orders will include dates.</p>}
             {report.excluded > 0 && <p className={styles.dataQuality}>{report.excluded} invalid or duplicate records excluded.</p>}
-            {source === "sample" && report.previous.start < samples[0]?.date && <p className={styles.dataQuality}>Sample history starts on {samples[0]?.date}. Dates before that have no sample records; comparisons may be incomplete.</p>}
+            {source === "sample" && report.previous.start < samples[0]?.date && <p className={styles.dataQuality}>Available history starts on {samples[0]?.date}. Dates before that have no records; comparisons may be incomplete.</p>}
             <section className={styles.kpiGrid} aria-label="Performance summary">
               <article className={styles.kpiCard}><span>Collected order value</span><strong>{pesoCents(report.totals.valueCents)}</strong><small>{changeLabel(report.salesChange)}</small></article>
               <article className={styles.kpiCard}><span>Orders in selection</span><strong>{report.totals.orders.toLocaleString("en-PH")}</strong><small>{changeLabel(report.orderChange)}</small></article>
               <article className={styles.kpiCard}><span>Average collected order</span><strong>{pesoCents(report.totals.averageCents)}</strong><small>{report.totals.collected} collected orders</small></article>
               <article className={styles.kpiCard}><span>Cancellation rate</span><strong>{report.totals.cancellationRate.toFixed(1)}%</strong><small>{report.totals.cancelled} of {report.totals.orders} selected orders</small></article>
             </section>
-            {report.orders.length === 0 && <div className={styles.empty} role="status"><strong>No orders in this selection</strong><p>Change the dates, status or data source. To test local reports, create an order in <Link href="/business/orders">Orders</Link>. Collected value appears after the order is marked Collected.</p></div>}
+            {report.orders.length === 0 && <div className={styles.empty} role="status"><strong>No orders in this selection</strong><p>Change the dates, status or data source. Create an order in <Link href="/business/orders">Orders</Link>. Collected value appears after the order is marked Collected.</p></div>}
             <div className={styles.analyticsGrid}>
               <section className={styles.panel} aria-label="Sales and orders trend">
                 <div className={styles.panelHeading}><div><h2>Order trends</h2><p>Every chart uses the selected dates and status.</p></div><div className={`${styles.viewTabs} ${styles.noPrint}`} role="group" aria-label="Chart interval">{TREND_VIEWS.map(view => <button key={view} type="button" className={trendView === view ? styles.viewTabActive : styles.viewTab} aria-pressed={trendView === view} onClick={() => setTrendView(view)}>{view}</button>)}</div></div>
@@ -198,7 +192,7 @@ export function BusinessAnalytics({ email }: { email: string }) {
             </div>
             <section className={`${styles.panel} ${styles.noPrint}`} aria-label="Detailed order report"><div className={styles.panelHeading}><div><h2>Detailed orders</h2><p>{report.orders.length} filtered rows. Order CSV includes every page. Order value below includes all selected statuses.</p></div></div><div className={styles.tableScroller}><table className={styles.productTable}><caption>Orders by creation date, newest first</caption><thead><tr><th scope="col">Order</th><th scope="col">Date</th><th scope="col">Product</th><th scope="col">Qty</th><th scope="col">Value</th><th scope="col">Status</th></tr></thead><tbody>{pageRows.map(o => <tr key={o.id}><td>{o.id}</td><td>{o.date}</td><td>{o.product}</td><td>{o.quantity}</td><td>{pesoCents(o.quantity * o.unitPriceCents)}</td><td>{STATUS_LABELS[o.status]}</td></tr>)}{!pageRows.length && <tr><td colSpan={6}>No matching orders.</td></tr>}</tbody></table></div><div className={styles.pagination}><button type="button" className={styles.secondaryButton} disabled={currentPage === 0} onClick={() => setPage(currentPage - 1)}>Previous</button><span aria-live="polite">Page {currentPage + 1} of {totalPages}</span><button type="button" className={styles.secondaryButton} disabled={currentPage + 1 >= totalPages} onClick={() => setPage(currentPage + 1)}>Next</button></div></section>
             <section className={styles.definitions} aria-label="Report definitions"><h2>How to read this report</h2><p>{REPORT_NOTE}</p><p>Order counts include all statuses selected above. Cancelled and unfinished orders contribute no collected value. Repeat customer rate measures repeat purchases within this selection, not cohort retention. Pickup demand uses order creation weekday because the owner queue does not store a separate pickup date.</p><p>Previous period comparisons use the same number of calendar days immediately before the selection and the same source and status filters. Zero previous value is shown without a percentage when the current value is positive.</p><p>Printing produces this summary. Use CSV for full order details and exact trend values.</p></section>
-            <div className={styles.reportFoot}><span>Refreshed {updatedAt ? new Date(updatedAt).toLocaleString("en-PH", { timeZone: "Asia/Manila" }) : ""} · Asia/Manila</span><span>Analytics and Reports · Batch 7</span></div>
+            <div className={styles.reportFoot}><span>Refreshed {updatedAt ? new Date(updatedAt).toLocaleString("en-PH", { timeZone: "Asia/Manila" }) : ""} · Asia/Manila</span></div>
           </>}
         </main>
       </div>

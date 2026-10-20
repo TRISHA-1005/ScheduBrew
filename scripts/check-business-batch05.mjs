@@ -63,7 +63,7 @@ if (existsSync(componentPath)) {
     ["Create reward workflow", component.includes("function createReward")],
     ["Points adjustment workflow", component.includes("function adjustPoints")],
     ["Reward redemption workflow", component.includes("function redeemReward")],
-    ["Browser-only warning", component.includes("saved only in this browser")],
+    ["Clean workspace labels", !component.includes("FRONTEND PREVIEW") && !component.includes("Test mode") && !component.includes("frontend prototype")],
   ]) {
     console.log(`${ok ? "PASS" : "FAIL"} ${label}`);
     if (!ok) failed++;

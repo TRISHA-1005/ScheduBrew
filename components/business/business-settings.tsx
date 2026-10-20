@@ -4,7 +4,7 @@ import { useEffect, useState, type FormEvent } from "react";
 import Link from "next/link";
 import {
   ArrowRight, BarChart3, Bell, Building2, CalendarClock, CheckCircle2,
-  ChevronRight, CircleAlert, Clock3, Coffee, CreditCard, LayoutDashboard,
+  ChevronRight, Clock3, Coffee, CreditCard, LayoutDashboard,
   ClipboardList, Mail, MapPin, Menu, Phone, RotateCcw, Save, Settings,
   ShieldCheck, UsersRound, X,
 } from "lucide-react";
@@ -35,17 +35,17 @@ const plans: Array<{
   description: string;
   features: string[];
 }> = [
-  { name: "Starter", price: "PHP 0 / month", description: "The essentials for a single shop.", features: ["Business profile and hours", "Order and pickup demo", "Basic customer directory"] },
-  { name: "Growth", price: "PHP 499 / month", description: "More visibility for a growing cafe.", features: ["Everything in Starter", "Loyalty and reward demo", "Analytics and report demo"] },
-  { name: "Pro", price: "PHP 999 / month", description: "An illustrative plan for a larger operation.", features: ["Everything in Growth", "Expanded planning examples", "Priority support example"] },
+  { name: "Starter", price: "PHP 0 / month", description: "The essentials for a single shop.", features: ["Business profile and hours", "Order and pickup management", "Basic customer directory"] },
+  { name: "Growth", price: "PHP 499 / month", description: "More visibility for a growing cafe.", features: ["Everything in Starter", "Loyalty and rewards", "Analytics and reports"] },
+  { name: "Pro", price: "PHP 999 / month", description: "For a larger operation.", features: ["Everything in Growth", "Expanded planning tools", "Priority support"] },
 ];
 
 const notificationItems: Array<{ key: keyof BusinessNotifications; title: string; description: string }> = [
   { key: "orderUpdates", title: "Order updates", description: "Show a preference for order status and preparation updates." },
   { key: "pickupReminders", title: "Pickup reminders", description: "Show a preference for reminders about upcoming pickup windows." },
-  { key: "lowCapacityAlerts", title: "Pickup capacity alerts", description: "Flag sample windows that are approaching their configured capacity." },
+  { key: "lowCapacityAlerts", title: "Pickup capacity alerts", description: "Flag pickup windows that are approaching their configured capacity." },
   { key: "loyaltyActivity", title: "Customer and loyalty activity", description: "Show a preference for customer visits, points and reward activity." },
-  { key: "weeklySummary", title: "Weekly business summary", description: "Opt in to a sample weekly summary preference." },
+  { key: "weeklySummary", title: "Weekly business summary", description: "Choose whether to receive a weekly business summary." },
 ];
 
 function avatar(email: string): string {
@@ -102,7 +102,7 @@ export function BusinessSettings({ email }: { email: string }) {
     const next = normalizeBusinessSettings(nextValue);
     if (!writeBusinessSettings(next)) {
       setNoticeKind("error");
-      setNotice("Settings could not be saved in this browser. Check browser storage permissions and try again.");
+      setNotice("Settings could not be saved. Check browser storage permissions and try again.");
       return false;
     }
     setSettings(next);
@@ -133,7 +133,7 @@ export function BusinessSettings({ email }: { email: string }) {
     if (profile.phone.length > 32 || profile.address.length > 120) {
       setNoticeKind("error"); setNotice("Check the phone number and address lengths."); return;
     }
-    if (commit({ ...settings, profile }, "Business profile saved to this browser.")) setProfileDraft(profile);
+    if (commit({ ...settings, profile }, "Business profile saved.")) setProfileDraft(profile);
   }
 
   function updateHour(day: BusinessDayKey, field: keyof OperatingDay, value: string | boolean) {
@@ -159,20 +159,20 @@ export function BusinessSettings({ email }: { email: string }) {
 
   function saveNotifications(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    commit({ ...settings, notifications: notificationDraft }, "Notification preferences saved to this browser.");
+    commit({ ...settings, notifications: notificationDraft }, "Notification preferences saved.");
   }
 
   function choosePlan(plan: SubscriptionPlan) {
     if (settings.subscription.plan === plan) {
-      setNoticeKind("success"); setNotice(`${plan} is already the selected demonstration plan.`); return;
+      setNoticeKind("success"); setNotice(`${plan} is already selected.`); return;
     }
     const next = { ...settings, subscription: { plan, updatedAt: new Date().toISOString() } };
-    commit(next, `Selected the ${plan} demonstration plan. No payment details were collected and no charge was made.`);
+    commit(next, `Selected the ${plan} plan.`);
   }
 
   function resetSettings() {
-    if (!window.confirm("Reset the business profile, operating hours, notifications and demo plan to their sample values?")) return;
-    if (commit(DEFAULT_BUSINESS_SETTINGS, "Sample business settings restored.")) {
+    if (!window.confirm("Reset the business profile, operating hours, notifications and plan to their original values?")) return;
+    if (commit(DEFAULT_BUSINESS_SETTINGS, "Business settings restored.")) {
       setProfileDraft(DEFAULT_BUSINESS_SETTINGS.profile);
       setHoursDraft(DEFAULT_BUSINESS_SETTINGS.operatingHours);
       setNotificationDraft(DEFAULT_BUSINESS_SETTINGS.notifications);
@@ -200,7 +200,6 @@ export function BusinessSettings({ email }: { email: string }) {
         <div className={shell.sideFoot}>
           <div className={shell.sideFootTitle}><ShieldCheck size={17} /> Business controls</div>
           <p>Manage shop information, opening times and workspace preferences.</p>
-          <span>Frontend demo · Batch 8</span>
         </div>
       </aside>
 
@@ -211,7 +210,6 @@ export function BusinessSettings({ email }: { email: string }) {
             <BusinessShopDetails />
           </div>
           <div className={shell.topRight}>
-            <span className={shell.demoTopBadge}><span /> Test mode</span>
             <div className={shell.avatar} title={email} aria-label={`Signed in user ${email}`}>{avatar(email)}</div>
             <Logout />
           </div>
@@ -220,10 +218,10 @@ export function BusinessSettings({ email }: { email: string }) {
         <main className={styles.main}>
           <div className={styles.pageHeading}>
             <div><span className={styles.eyebrow}>BUSINESS OWNER WORKSPACE</span><h1>Business settings</h1><p>Keep your shop details, opening hours and preferences up to date.</p></div>
-            <button type="button" className={styles.resetButton} onClick={resetSettings} disabled={!hydrated}><RotateCcw size={16} /> Reset sample settings</button>
+            <button type="button" className={styles.resetButton} onClick={resetSettings} disabled={!hydrated}><RotateCcw size={16} /> Reset settings</button>
           </div>
 
-          <div className={styles.demoNotice} role="note"><CircleAlert size={18} /><span>Frontend demonstration only. These settings are stored in this browser. Subscription plans and prices are examples, and no billing or notifications are sent.</span></div>
+          
           {notice && <div className={`${styles.notice} ${noticeKind === "error" ? styles.noticeError : styles.noticeSuccess}`} role={noticeKind === "error" ? "alert" : "status"}><span>{notice}</span><button type="button" onClick={() => setNotice("")} aria-label="Dismiss message"><X size={17} /></button></div>}
 
           <section className={styles.card} aria-labelledby="profile-heading">
@@ -270,15 +268,15 @@ export function BusinessSettings({ email }: { email: string }) {
                   <span className={styles.switchWrap}><input type="checkbox" checked={notificationDraft[item.key]} onChange={event => setNotificationDraft({ ...notificationDraft, [item.key]: event.target.checked })} /><span aria-hidden="true" /></span>
                 </label>)}
               </div>
-              <div className={styles.formFooter}><span>Preferences only. This batch does not send emails, push messages or SMS.</span><button type="submit" className={styles.primaryButton} disabled={!hydrated}><Save size={16} /> Save preferences</button></div>
+              <div className={styles.formFooter}><button type="submit" className={styles.primaryButton} disabled={!hydrated}><Save size={16} /> Save preferences</button></div>
             </form>
           </section>
 
           <section className={styles.card} aria-labelledby="subscription-heading">
-            <div className={styles.sectionHeading}><span className={styles.sectionIcon}><CreditCard size={19} /></span><div><h2 id="subscription-heading">Subscription plan</h2><p>Preview example plan options without connecting a payment provider.</p></div></div>
+            <div className={styles.sectionHeading}><span className={styles.sectionIcon}><CreditCard size={19} /></span><div><h2 id="subscription-heading">Subscription plan</h2></div></div>
             <div className={styles.currentPlan}>
-              <div><span className={styles.currentPlanLabel}>SELECTED DEMO PLAN</span><h3>{settings.subscription.plan}</h3><p>{plans.find(plan => plan.name === settings.subscription.plan)?.description}</p></div>
-              <span className={styles.planStatus}><CheckCircle2 size={15} /> Demo selected</span>
+              <div><span className={styles.currentPlanLabel}>CURRENT PLAN</span><h3>{settings.subscription.plan}</h3><p>{plans.find(plan => plan.name === settings.subscription.plan)?.description}</p></div>
+              <span className={styles.planStatus}><CheckCircle2 size={15} /> Selected</span>
             </div>
             <div className={styles.planGrid}>
               {plans.map(plan => {
@@ -291,10 +289,10 @@ export function BusinessSettings({ email }: { email: string }) {
                 </article>;
               })}
             </div>
-            <p className={styles.billingNote}><ShieldCheck size={16} /> Demo plan changes are stored locally. No payment method is requested, no subscription is created, and no charge is made.</p>
+            
           </section>
 
-          <footer className={styles.footer}><span>© ScheduBrew by The Ready Counter · Business frontend prototype</span><Link href="/business/analytics">View reports <ArrowRight size={14} /></Link></footer>
+          <footer className={styles.footer}><Link href="/business/analytics">View reports <ArrowRight size={14} /></Link></footer>
         </main>
       </div>
     </div>

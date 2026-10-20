@@ -3,15 +3,15 @@
 import Link from "next/link";
 import { useEffect, useMemo, useState, type FormEvent } from "react";
 import {
-  ArrowLeft, ArrowRight, BarChart3, CalendarClock, CheckCircle2, ChevronLeft,
-  ChevronRight, CircleAlert, ClipboardList, Clock3, Coffee, LayoutDashboard,
+  ArrowRight, BarChart3, CalendarClock, ChevronLeft,
+  ChevronRight, ClipboardList, Clock3, Coffee, LayoutDashboard,
   Lock, Menu, RefreshCcw, Save, Settings, ShieldCheck, SlidersHorizontal,
   UsersRound, X, Plus, Ban,
 } from "lucide-react";
 import { Logout } from "@/components/schedu/logout";
 import { BusinessShopDetails } from "./business-shop-details";
 import {
-  BUSINESS_CHANGED_EVENT, BUSINESS_CAPACITY_STORAGE, BUSINESS_ORDER_STORAGE, BUSINESS_STATUS_STORAGE,
+  BUSINESS_CHANGED_EVENT, BUSINESS_CAPACITY_STORAGE,
   readDemoSlots, safeWriteJson, type BusinessDemoOrder, type DemoPickupSlot,
 } from "./demo-business-data";
 import {
@@ -138,7 +138,7 @@ export function BusinessPickupSchedule({ email }: { email: string }) {
       return;
     }
     if (row.booked > 0) {
-      setNotice(`Cannot block ${time}: it already has ${row.booked} illustrative bookings. Clear bookings in the real backend before blocking an occupied slot.`);
+      setNotice(`Cannot block ${time}: it already has ${row.booked} bookings.`);
       return;
     }
     setBlockReason("Equipment maintenance");
@@ -154,7 +154,7 @@ export function BusinessPickupSchedule({ email }: { email: string }) {
     const updated = { ...blocks, [key]: text };
     setBlocks(updated);
     savePickupBlocks(updated);
-    setNotice(`${blockTime} on ${readableDate(selectedDate, false)} blocked for this browser demo.`);
+    setNotice(`${blockTime} on ${readableDate(selectedDate, false)} blocked.`);
     setBlockTime(null);
   }
 
@@ -163,7 +163,7 @@ export function BusinessPickupSchedule({ email }: { email: string }) {
     delete updated[slotStorageKey(selectedDate, time)];
     setBlocks(updated);
     savePickupBlocks(updated);
-    setNotice(`Removed the test block from ${time}.`);
+    setNotice(`Removed the block from ${time}.`);
   }
 
   function saveRules(event: FormEvent<HTMLFormElement>) {
@@ -177,7 +177,7 @@ export function BusinessPickupSchedule({ email }: { email: string }) {
       return Math.max(slot.booked, matched?.booked ?? slot.booked);
     }), 0);
     if (draftLimit < minimum && selectedDate === today) {
-      setNotice(`Maximum orders cannot be below ${minimum} because existing test bookings already occupy the busiest Dashboard slot.`);
+      setNotice(`Maximum orders cannot be below ${minimum} because existing bookings already occupy the busiest Dashboard slot.`);
       return;
     }
     const updated: PickupRules = { maxPerSlot: draftLimit, bufferMinutes: draftBuffer };
@@ -186,7 +186,7 @@ export function BusinessPickupSchedule({ email }: { email: string }) {
       const next = capacitySlots.map(slot => ({ ...slot, capacity: Math.max(draftLimit, slot.booked) }));
       setCapacitySlots(next); safeWriteJson(BUSINESS_CAPACITY_STORAGE, next);
     }
-    setNotice("Pickup rules saved locally. Dashboard capacity bars will reflect the new limit when reopened.");
+    setNotice("Pickup rules saved.");
   }
 
   function openAdjust(time: string) {
@@ -207,18 +207,18 @@ export function BusinessPickupSchedule({ email }: { email: string }) {
     setCapacitySlots(updated);
     safeWriteJson(BUSINESS_CAPACITY_STORAGE, updated);
     setAdjustTime(null);
-    setNotice(`Updated ${row.label} capacity to ${adjustCapacity} test orders. The Dashboard uses the same value.`);
+    setNotice(`Updated ${row.label} capacity to ${adjustCapacity} orders.`);
   }
 
   function resetSchedule() {
-    if (!window.confirm("Reset blocked slots and pickup rules to their original sample values? This will also reset the Dashboard slot capacities, but not order statuses.")) return;
+    if (!window.confirm("Reset blocked slots and pickup rules to their original values? This will also reset the Dashboard slot capacities, but not order statuses.")) return;
     const defaults = readDemoSlots().map(slot => ({ ...slot, capacity: ({ s300: 20, s320: 25, s340: 25, s400: 25, s420: 25 } as Record<string, number>)[slot.id] ?? slot.capacity }));
     const restored: PickupRules = { maxPerSlot: 25, bufferMinutes: 5 };
     setBlocks({}); setRules(restored); setDraftLimit(25); setDraftBuffer(5);
     setCapacitySlots(defaults);
     savePickupBlocks({}); savePickupRules(restored);
     safeWriteJson(BUSINESS_CAPACITY_STORAGE, defaults);
-    setNotice("Pickup blocks, rules, and Dashboard sample capacities were reset. Your test orders were kept.");
+    setNotice("Pickup blocks, rules, and Dashboard capacities were reset. Existing orders were kept.");
   }
 
   function navigate(days: number) { setSelectedDate(day => addDays(day, days)); }
@@ -235,15 +235,13 @@ export function BusinessPickupSchedule({ email }: { email: string }) {
           <button type="button" className={shell.closeSide} onClick={() => setMobileMenu(false)} aria-label="Close menu"><X size={20}/></button>
         </div>
         <nav className={shell.sideNavigation} aria-label="Business modules">
-          {nav.map(({ name, icon: Icon, href, batch }) => href ?
+          {nav.map(({ name, icon: Icon, href, batch }) => (
             <Link key={name} href={href} aria-current={batch === 3 ? "page" : undefined} className={`${shell.sideItem} ${batch === 3 ? shell.sideActive : ""}`} onClick={() => setMobileMenu(false)}><Icon size={18}/><span>{name}</span></Link>
-            : <button type="button" key={name} className={shell.sideItem} onClick={() => { setMobileMenu(false); setNotice(`${name} will be developed in Business Batch ${batch}.`); }}><Icon size={18}/><span>{name}</span><small>Later</small></button>
-          )}
+          ))}
         </nav>
         <div className={shell.sideFoot}>
           <div className={shell.sideFootTitle}><ShieldCheck size={17}/> Balanced pickup times</div>
-          <p>Review example booking loads and configure test pickup rules.</p>
-          <span>Frontend test workspace · Batch 3</span>
+          <p>Review booking loads and configure pickup rules.</p>
         </div>
       </aside>
 
@@ -255,7 +253,6 @@ export function BusinessPickupSchedule({ email }: { email: string }) {
           </div>
           <div className={shell.topRight}>
             <span className={shell.datePill}><CalendarClock size={14}/>{today ? readableDate(today, false) : "Today"}</span>
-            <span className={shell.demoTopBadge}><span/> Test mode</span>
             <div className={shell.avatar} title={email} aria-label="Signed in user">{avatar(email)}</div>
             <Logout />
           </div>
@@ -268,14 +265,14 @@ export function BusinessPickupSchedule({ email }: { email: string }) {
               <button type="button" className={s.orangeButton} disabled={invalidSelectedDate} onClick={() => showBlockDialog(slots.find(row => !row.blockedReason && row.booked === 0)?.label ?? TIME_LABELS[0])}><Plus size={16}/> Block time</button>
             </div>
           </div>
-          <div className={s.testNote} role="note"><CircleAlert size={17}/><span>Test workspace only. The displayed bookings and dates are illustrative. Blocking time or changing capacity does not reserve slots, notify customers, or change live shop operations.</span></div>
+          
           {notice && <div className={s.notice} role="status"><span>{notice}</span><button type="button" onClick={() => setNotice("")} aria-label="Dismiss notice"><X size={17}/></button></div>}
 
           <div className={s.overview} aria-label="Selected day overview">
-            <div><span>Bookings shown</span><strong>{bookedTotal}</strong><small>Includes example baseline</small></div>
+            <div><span>Bookings shown</span><strong>{bookedTotal}</strong></div>
             <div><span>Open windows</span><strong>{slots.filter(slot => !slot.blockedReason && slot.remaining > 0).length}</strong><small>Out of {TIME_LABELS.length} windows</small></div>
-            <div><span>Unavailable windows</span><strong>{blockedTotal}</strong><small>Saved on this browser</small></div>
-            <div><span>Visible order cards</span><strong>{visibleOrders}</strong><small>From your Orders module</small></div>
+            <div><span>Unavailable windows</span><strong>{blockedTotal}</strong><small>Current schedule</small></div>
+            <div><span>Visible order cards</span><strong>{visibleOrders}</strong><small>From Orders</small></div>
           </div>
 
           <div className={s.layout}>
@@ -299,9 +296,9 @@ export function BusinessPickupSchedule({ email }: { email: string }) {
                       <div className={s.slotTop}><span className={s.slotHeading}>{isPickupSlotOutsideHours(row) ? <><Lock size={13}/> Unavailable: {row.blockedReason}</> : row.blockedReason ? <><Lock size={13}/> Blocked: {row.blockedReason}</> : row.booked === 0 ? "Open capacity" : `${row.booked} of ${row.capacity} bookings`}</span><span className={s.slotCapacity}>{row.blockedReason ? "Unavailable" : full ? "Full" : `${row.remaining} left`}</span></div>
                       {!row.blockedReason && <div className={s.progressTrack} role="progressbar" aria-label={`${row.label} load`} aria-valuemin={0} aria-valuemax={100} aria-valuenow={pct}><div style={{ width: `${pct}%` }}/></div>}
                       {row.orderCards.length > 0 && <div className={s.orderChips}>{row.orderCards.map(order => <Link href="/business/orders" key={order.id} className={s.orderChip} title={`See ${order.id} in Orders`}>{order.id} · {order.quantity} item{order.quantity > 1 ? "s" : ""} <span>{statusNames[order.status]}</span></Link>)}</div>}
-                      {row.booked > row.orderCards.length && !row.blockedReason && <p className={s.mutedHint}>Other bookings are illustrative baseline data.</p>}
+                      {row.booked > row.orderCards.length && !row.blockedReason && <p className={s.mutedHint}>Other bookings</p>}
                     </div>
-                    <div className={s.rowActions}>{isPickupSlotOutsideHours(row) ? <span className={s.mutedHint}>Hours rule</span> : row.blockedReason ? <button className={s.unblockButton} type="button" onClick={() => unblock(row.label)}>Unblock</button> : <button className={s.smallButton} type="button" onClick={() => showBlockDialog(row.label)} disabled={row.booked > 0} title={row.booked > 0 ? "Cannot block a booked sample slot" : "Block this time"}><Ban size={13}/> Block</button>}
+                    <div className={s.rowActions}>{isPickupSlotOutsideHours(row) ? <span className={s.mutedHint}>Hours rule</span> : row.blockedReason ? <button className={s.unblockButton} type="button" onClick={() => unblock(row.label)}>Unblock</button> : <button className={s.smallButton} type="button" onClick={() => showBlockDialog(row.label)} disabled={row.booked > 0} title={row.booked > 0 ? "Cannot block a booked slot" : "Block this time"}><Ban size={13}/> Block</button>}
                       {row.id && selectedDate === today && !row.blockedReason && <button className={s.smallButton} type="button" onClick={() => openAdjust(row.label)}><SlidersHorizontal size={13}/> Capacity</button>}</div>
                   </div>;
                 })}
@@ -319,7 +316,7 @@ export function BusinessPickupSchedule({ email }: { email: string }) {
                   </button>;
                 })}
               </div>}
-              <footer className={s.scheduleFooter}><span>All windows and figures shown are for interface testing, not live reservations.</span><Link href="/business/orders">Manage order statuses <ArrowRight size={14}/></Link></footer>
+              <footer className={s.scheduleFooter}><Link href="/business/orders">Manage order statuses <ArrowRight size={14}/></Link></footer>
             </section>
 
             <aside className={s.rightColumn} aria-label="Pickup rules and summary">
@@ -327,10 +324,10 @@ export function BusinessPickupSchedule({ email }: { email: string }) {
                 <div className={s.panelTitle}><SlidersHorizontal size={18}/><h2>Slot rules</h2></div>
                 <form className={s.rulesForm} onSubmit={saveRules}>
                   <label>Window length <input type="text" value="20 minutes" disabled aria-describedby="window-explainer"/></label>
-                  <p id="window-explainer" className={s.helpText}>Fixed to match the existing Dashboard and Orders test slots. Configurable intervals will be supported in the database phase.</p>
+                  
                   <label>Max orders per window <input type="number" min={1} max={100} value={draftLimit} onChange={e => setDraftLimit(Number(e.target.value))} required/></label>
                   <label>Rush buffer <select value={draftBuffer} onChange={e => setDraftBuffer(Number(e.target.value))}>{[0,5,10,15].map(n => <option value={n} key={n}>{n ? `+ ${n} minutes after 80% capacity` : "No additional buffer"}</option>)}</select></label>
-                  <p className={s.helpText}>Rush buffer is a saved display preference; it does not automatically change customer pickup availability yet.</p>
+                  
                   <button className={s.orangeButton} type="submit" disabled={!hydrated}><Save size={16}/> Save rules</button>
                 </form>
               </section>
@@ -342,27 +339,26 @@ export function BusinessPickupSchedule({ email }: { email: string }) {
                   <div><dt>Peak window</dt><dd>{peakSlot && peakSlot.booked ? peakSlot.label : "No bookings"}</dd></div>
                   <div><dt>Unavailable windows</dt><dd>{blockedTotal}</dd></div>
                 </dl>
-                <p className={s.helpText}>Figures above refer to the selected day, not confirmed customer bookings.</p>
+                
               </section>
-              <button type="button" className={s.resetButton} onClick={resetSchedule} disabled={!hydrated}><RefreshCcw size={16}/> Reset sample schedule settings</button>
+              <button type="button" className={s.resetButton} onClick={resetSchedule} disabled={!hydrated}><RefreshCcw size={16}/> Reset schedule settings</button>
             </aside>
           </div>
-          <footer className={s.footnote}>© ScheduBrew by The Ready Counter · Business frontend prototype · No live booking or merchant authorization</footer>
         </main>
       </div>
 
       {blockTime && <div className={s.modalBackdrop} onMouseDown={event => { if (event.target === event.currentTarget) setBlockTime(null); }}>
         <section role="dialog" aria-modal="true" aria-labelledby="block-title" className={s.modal}>
           <div className={s.modalHead}><div><span className={s.eyebrow}>PICKUP TIME CONTROL</span><h2 id="block-title">Block {blockTime}</h2></div><button type="button" aria-label="Close block dialog" onClick={() => setBlockTime(null)}><X size={19}/></button></div>
-          <p>This action marks one unused sample slot as unavailable on {readableDate(selectedDate)}. It is not a real reservation system.</p>
-          <form onSubmit={saveBlock} className={s.modalForm}><label>Reason for blocking<input value={blockReason} onChange={e => setBlockReason(e.target.value)} maxLength={80} required autoFocus/></label><button type="submit" className={s.orangeButton}><Lock size={16}/> Block time in test schedule</button></form>
+          <p>This action marks one unused slot as unavailable on {readableDate(selectedDate)}.</p>
+          <form onSubmit={saveBlock} className={s.modalForm}><label>Reason for blocking<input value={blockReason} onChange={e => setBlockReason(e.target.value)} maxLength={80} required autoFocus/></label><button type="submit" className={s.orangeButton}><Lock size={16}/> Block time</button></form>
         </section>
       </div>}
       {adjustTime && <div className={s.modalBackdrop} onMouseDown={event => { if (event.target === event.currentTarget) setAdjustTime(null); }}>
         <section role="dialog" aria-modal="true" aria-labelledby="adjust-title" className={s.modal}>
           <div className={s.modalHead}><div><span className={s.eyebrow}>CAPACITY CONTROL</span><h2 id="adjust-title">Update {adjustTime}</h2></div><button type="button" aria-label="Close capacity dialog" onClick={() => setAdjustTime(null)}><X size={19}/></button></div>
-          <p>Adjust the same example capacity used in the Business Dashboard. Never set below its existing test bookings.</p>
-          <form onSubmit={saveAdjust} className={s.modalForm}><label>Maximum orders for this window<input type="number" min={slots.find(slot => slot.label === adjustTime)?.booked ?? 1} max={100} step={1} value={adjustCapacity} onChange={e => setAdjustCapacity(Number(e.target.value))} required autoFocus/></label><button type="submit" className={s.orangeButton}><Save size={16}/> Save test capacity</button></form>
+          <p>Adjust the capacity used in the Business Dashboard. Never set below its existing bookings.</p>
+          <form onSubmit={saveAdjust} className={s.modalForm}><label>Maximum orders for this window<input type="number" min={slots.find(slot => slot.label === adjustTime)?.booked ?? 1} max={100} step={1} value={adjustCapacity} onChange={e => setAdjustCapacity(Number(e.target.value))} required autoFocus/></label><button type="submit" className={s.orangeButton}><Save size={16}/> Save capacity</button></form>
         </section>
       </div>}
     </div>

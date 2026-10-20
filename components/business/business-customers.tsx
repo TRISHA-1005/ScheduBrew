@@ -4,7 +4,7 @@ import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 import Link from "next/link";
 import {
   Award, BarChart3, CalendarClock, Check, ChevronDown,
-  CircleAlert, ClipboardList, Coffee, Download, Eye, Gift, LayoutDashboard,
+  ClipboardList, Coffee, Download, Eye, Gift, LayoutDashboard,
   Mail, Menu, MoreHorizontal, Plus, RotateCcw, Search, Settings, ShieldCheck,
   Sparkles, TrendingUp, UsersRound, Wallet, X,
 } from "lucide-react";
@@ -166,12 +166,12 @@ export function BusinessCustomers({ email }: { email: string }) {
     const url = URL.createObjectURL(blob);
     const anchor = document.createElement("a");
     anchor.href = url;
-    anchor.download = "schedu-brew-customer-directory-example.csv";
+    anchor.download = "schedubrew-customer-directory.csv";
     document.body.appendChild(anchor);
     anchor.click();
     anchor.remove();
     window.setTimeout(() => URL.revokeObjectURL(url), 2500);
-    setNotice("Exported the illustrative customer directory as a CSV file.");
+    setNotice("Customer directory exported as a CSV file.");
   }
 
   function openRewardDialog() {
@@ -202,7 +202,7 @@ export function BusinessCustomers({ email }: { email: string }) {
       return;
     }
     if (rewards.length >= 100) {
-      setRewardFormError("This frontend prototype supports up to 100 rewards.");
+      setRewardFormError("A maximum of 100 rewards is allowed.");
       return;
     }
     const reward: LoyaltyReward = {
@@ -220,7 +220,7 @@ export function BusinessCustomers({ email }: { email: string }) {
   }
 
   function removeReward(reward: LoyaltyReward) {
-    if (!window.confirm(`Remove "${reward.name}" from this browser's sample rewards?`)) return;
+    if (!window.confirm(`Remove "${reward.name}" from rewards?`)) return;
     saveRewards(rewards.filter(item => item.id !== reward.id), `${reward.name} was removed from the local rewards list.`);
   }
 
@@ -258,7 +258,7 @@ export function BusinessCustomers({ email }: { email: string }) {
       pointsIssuedThisMonth: metrics.pointsIssuedThisMonth + (pointsAction === "add" ? amount : 0),
     };
     if (!writeOwnerCustomers(nextCustomers)) {
-      setPointsFormError("The adjustment could not be saved in this browser. Try again.");
+      setPointsFormError("The adjustment could not be saved. Try again.");
       return;
     }
     if (!writeLoyaltyMetrics(nextMetrics)) {
@@ -293,7 +293,7 @@ export function BusinessCustomers({ email }: { email: string }) {
     const rewardSaved = writeOwnerRewards(nextRewards);
     const metricsSaved = writeLoyaltyMetrics(nextMetrics);
     if (!customerSaved || !rewardSaved || !metricsSaved) {
-      setNotice("The redemption could not be fully saved in this browser. Refresh the page and check the sample data.");
+      setNotice("The redemption could not be saved. Refresh the page and try again.");
       return;
     }
     setCustomers(nextCustomers);
@@ -303,12 +303,12 @@ export function BusinessCustomers({ email }: { email: string }) {
   }
 
   function resetExamples() {
-    if (!window.confirm("Reset customer records, rewards and loyalty totals to the original examples? This removes your browser-only changes.")) return;
+    if (!window.confirm("Reset customer records, rewards and loyalty totals to their original values? This removes your saved changes.")) return;
     const customersOk = writeOwnerCustomers(STARTER_CUSTOMERS.map(customer => ({ ...customer })));
     const rewardsOk = writeOwnerRewards(STARTER_REWARDS.map(reward => ({ ...reward })));
     const metricsOk = writeLoyaltyMetrics({ ...STARTER_LOYALTY_METRICS });
     if (!customersOk || !rewardsOk || !metricsOk) {
-      setNotice("Some example data could not be reset. Check browser storage and try again.");
+      setNotice("Some data could not be reset. Check browser storage and try again.");
       return;
     }
     setCustomers(STARTER_CUSTOMERS.map(customer => ({ ...customer })));
@@ -317,7 +317,7 @@ export function BusinessCustomers({ email }: { email: string }) {
     setQuery("");
     setTierFilter("All tiers");
     setSelectedCustomerId(null);
-    setNotice("Restored the original customer and loyalty examples.");
+    setNotice("Restored customer and loyalty settings.");
   }
 
   return (
@@ -332,20 +332,15 @@ export function BusinessCustomers({ email }: { email: string }) {
           <button type="button" className={shell.closeSide} onClick={() => setMobileMenu(false)} aria-label="Close navigation"><X size={20} /></button>
         </div>
         <nav className={shell.sideNavigation} aria-label="Business modules">
-          {nav.map(({ name, icon: Icon, href, batch }) => href ? (
+          {nav.map(({ name, icon: Icon, href, batch }) => (
             <Link key={name} href={href} className={`${shell.sideItem} ${batch === 5 ? shell.sideActive : ""}`} aria-current={batch === 5 ? "page" : undefined} onClick={() => setMobileMenu(false)}>
               <Icon size={18} aria-hidden="true" /><span>{name}</span>
             </Link>
-          ) : (
-            <button key={name} type="button" className={shell.sideItem} onClick={() => { setMobileMenu(false); setNotice(`${name} is planned for Business Owner Batch ${batch}.`); }}>
-              <Icon size={18} aria-hidden="true" /><span>{name}</span><small>Later</small>
-            </button>
           ))}
         </nav>
         <div className={shell.sideFoot}>
           <div className={shell.sideFootTitle}><ShieldCheck size={17} /> Customer care and loyalty</div>
           <p>Review regular customers, keep reward rules clear, and recognize repeat visits.</p>
-          <span>Frontend workspace · Batch 5</span>
         </div>
       </aside>
 
@@ -357,7 +352,6 @@ export function BusinessCustomers({ email }: { email: string }) {
           </div>
           <div className={shell.topRight}>
             <span className={shell.datePill}><CalendarClock size={14} />{new Intl.DateTimeFormat("en-PH", { year: "numeric", month: "short", day: "numeric", timeZone: "Asia/Manila" }).format(new Date())}</span>
-            <span className={shell.demoTopBadge}><span /> Test mode</span>
             <div className={shell.avatar} title={email} aria-label="Signed in user">{avatarInitials(email)}</div>
             <Logout />
           </div>
@@ -372,15 +366,15 @@ export function BusinessCustomers({ email }: { email: string }) {
             </div>
           </div>
 
-          <div className={styles.modeNotice} role="note"><CircleAlert size={17} /><span><strong>FRONTEND PREVIEW</strong> Customer profiles, points, and reward activity are illustrative and saved only in this browser. No real customer is contacted and no live loyalty account is changed.</span></div>
+          
           {notice && <div className={styles.notice} role="status"><span>{notice}</span><button type="button" aria-label="Dismiss message" onClick={() => setNotice("")}><X size={16} /></button></div>}
 
           <div className={styles.dashboardGrid}>
             <div className={styles.primaryColumn}>
               <section className={styles.statsGrid} aria-label="Customer and loyalty summary">
-                <article className={styles.statCard}><span>Active customers</span><strong>1,284</strong><small className={styles.positive}><TrendingUp size={13} /> +8.1% illustrative trend</small></article>
+                <article className={styles.statCard}><span>Active customers</span><strong>1,284</strong><small className={styles.positive}><TrendingUp size={13} /> +8.1%</small></article>
                 <article className={styles.statCard}><span>Loyalty members</span><strong>764</strong><small className={styles.orangeText}>59.5% enrolled</small></article>
-                <article className={styles.statCard}><span>Repeat purchase</span><strong>62%</strong><small className={styles.positive}>Healthy sample rate</small></article>
+                <article className={styles.statCard}><span>Repeat purchase</span><strong>62%</strong><small className={styles.positive}>Healthy rate</small></article>
               </section>
 
               <section className={styles.panel} aria-label="Customer directory">
@@ -411,26 +405,26 @@ export function BusinessCustomers({ email }: { email: string }) {
                     </tbody>
                   </table>
                 </div>
-                <div className={styles.tableFooter}><span>Illustrative sample records only</span><button type="button" className={styles.textButton} onClick={resetExamples}><RotateCcw size={14} /> Reset examples</button></div>
+                <div className={styles.tableFooter}><span>Customer records</span><button type="button" className={styles.textButton} onClick={resetExamples}><RotateCcw size={14} /> Reset records</button></div>
               </section>
 
               <section className={styles.panel} aria-label="Loyalty rewards">
                 <div className={styles.panelHeading}>
-                  <div><h2>Rewards catalog</h2><p>Control which sample rewards customers can redeem.</p></div>
+                  <div><h2>Rewards catalog</h2><p>Manage which rewards customers can redeem.</p></div>
                   <button type="button" className={styles.smallPrimary} onClick={openRewardDialog}><Plus size={15} /> Add reward</button>
                 </div>
                 <div className={styles.rewardGrid}>
                   {rewards.map(reward => <article className={styles.rewardCard} key={reward.id}>
                     <div className={styles.rewardIcon}><Gift size={18} /></div>
                     <div className={styles.rewardDetails}><div className={styles.rewardTitleRow}><h3>{reward.name}</h3><span className={`${styles.statusBadge} ${reward.active ? styles.statusActive : styles.statusPaused}`}>{reward.active ? "Active" : "Paused"}</span></div>
-                      <p>{reward.description || "No description provided."}</p><strong>{formatPoints(reward.pointsRequired)} points</strong><small>{formatPoints(reward.redemptions)} sample redemptions</small>
+                      <p>{reward.description || "No description provided."}</p><strong>{formatPoints(reward.pointsRequired)} points</strong><small>{formatPoints(reward.redemptions)} redemptions</small>
                     </div>
                     <div className={styles.rewardActions}>
                         <button type="button" className={styles.iconButton} onClick={() => toggleReward(reward)} aria-label={`${reward.active ? "Pause" : "Activate"} ${reward.name}`} title={reward.active ? "Pause reward" : "Activate reward"}>{reward.active ? <Check size={17} /> : <Sparkles size={17} />}</button>
                         <button type="button" className={styles.iconButton} onClick={() => removeReward(reward)} aria-label={`Remove ${reward.name}`} title="Remove reward"><X size={17} /></button>
                       </div>
                     </article>)}
-                  {rewards.length === 0 && <div className={styles.emptyRewards}><Gift size={23} /><strong>No rewards yet</strong><span>Create a reward to start configuring the sample loyalty catalog.</span></div>}
+                  {rewards.length === 0 && <div className={styles.emptyRewards}><Gift size={23} /><strong>No rewards yet</strong><span>Create a reward to build your loyalty catalog.</span></div>}
                 </div>
               </section>
             </div>
@@ -442,11 +436,11 @@ export function BusinessCustomers({ email }: { email: string }) {
                 <p>1 point per ₱10 spent · points expire after 12 months.</p>
                 <div className={styles.programRule}><span>Points issued this month</span><strong>{formatPoints(metrics.pointsIssuedThisMonth)}</strong></div>
                 <div className={styles.programRule}><span>Rewards redeemed</span><strong>{formatPoints(metrics.rewardsRedeemed)}</strong></div>
-                <div className={styles.programFoot}><Gift size={15} /><span>{activeRewards.length} active rewards available in this browser demo</span></div>
+                <div className={styles.programFoot}><Gift size={15} /><span>{activeRewards.length} active rewards</span></div>
               </section>
 
               <section className={styles.topCustomerCard}>
-                <div className={styles.panelHeading}><div><h2>Top customer</h2><p>Highest illustrative lifetime spend</p></div><Award size={19} /></div>
+                <div className={styles.panelHeading}><div><h2>Top customer</h2><p>Highest lifetime spend</p></div><Award size={19} /></div>
                 {topCustomer ? <>
                   <div className={styles.topCustomerIdentity}><span className={styles.topCustomerAvatar}>{initials(topCustomer.name)}</span><div><strong>{topCustomer.name}</strong><span>{topCustomer.orders} orders · {money(topCustomer.spent)} spent</span></div></div>
                   <div className={styles.topCustomerMeta}><span className={`${styles.tierBadge} ${tierClass(tierForPoints(topCustomer.points))}`}>{tierForPoints(topCustomer.points)} member</span><strong>{formatPoints(topCustomer.points)} pts</strong></div>
@@ -459,7 +453,7 @@ export function BusinessCustomers({ email }: { email: string }) {
                 <div className={styles.tierRow}><span className={`${styles.tierDot} ${styles.goldDot}`} /><span>Gold</span><strong>{tierCounts.Gold}</strong></div>
                 <div className={styles.tierRow}><span className={`${styles.tierDot} ${styles.silverDot}`} /><span>Silver</span><strong>{tierCounts.Silver}</strong></div>
                 <div className={styles.tierRow}><span className={`${styles.tierDot} ${styles.bronzeDot}`} /><span>Bronze</span><strong>{tierCounts.Bronze}</strong></div>
-                <p className={styles.tierFootnote}>Example thresholds: Gold 700+ points, Silver 400 to 699, Bronze below 400.</p>
+                <p className={styles.tierFootnote}>Membership thresholds: Gold 700+ points, Silver 400 to 699, Bronze below 400.</p>
               </section>
             </aside>
           </div>
@@ -468,21 +462,21 @@ export function BusinessCustomers({ email }: { email: string }) {
 
       {rewardDialog && <div className={styles.modalBackdrop} role="presentation" onMouseDown={event => { if (event.target === event.currentTarget) setRewardDialog(false); }}>
         <section className={styles.modal} role="dialog" aria-modal="true" aria-labelledby="create-reward-title">
-          <div className={styles.modalHeader}><div><span className={styles.eyebrow}>LOYALTY PROGRAM</span><h2 id="create-reward-title">Create reward</h2><p>Set up a reward for the illustrative Brew Points catalog.</p></div><button type="button" className={styles.iconButton} onClick={() => setRewardDialog(false)} aria-label="Close create reward"><X size={19} /></button></div>
+          <div className={styles.modalHeader}><div><span className={styles.eyebrow}>LOYALTY PROGRAM</span><h2 id="create-reward-title">Create reward</h2><p>Set up a reward for the Brew Points catalog.</p></div><button type="button" className={styles.iconButton} onClick={() => setRewardDialog(false)} aria-label="Close create reward"><X size={19} /></button></div>
           <form onSubmit={createReward}>
             <label className={styles.field}>Reward name<input ref={rewardNameRef} value={rewardForm.name} onChange={event => setRewardForm({ ...rewardForm, name: event.target.value })} maxLength={100} placeholder="e.g. Free iced latte" required /></label>
             <label className={styles.field}>Description <span className={styles.optional}>(optional)</span><textarea value={rewardForm.description} onChange={event => setRewardForm({ ...rewardForm, description: event.target.value })} maxLength={240} rows={3} placeholder="Explain what the customer receives." /></label>
             <label className={styles.field}>Points required<input type="number" min="1" max="100000" step="1" value={rewardForm.pointsRequired} onChange={event => setRewardForm({ ...rewardForm, pointsRequired: event.target.value })} required /></label>
             {rewardFormError && <div className={styles.formError} role="alert">{rewardFormError}</div>}
             <div className={styles.modalActions}><button type="button" className={styles.secondaryButton} onClick={() => setRewardDialog(false)}>Cancel</button><button type="submit" className={styles.primaryButton}><Plus size={16} /> Save reward</button></div>
-            <p className={styles.modalFootnote}>This reward is saved only in the current browser. It does not appear in the Customer Portal yet.</p>
+            
           </form>
         </section>
       </div>}
 
       {selectedCustomer && <div className={styles.modalBackdrop} role="presentation" onMouseDown={event => { if (event.target === event.currentTarget) setSelectedCustomerId(null); }}>
         <section className={`${styles.modal} ${styles.profileModal}`} role="dialog" aria-modal="true" aria-labelledby="customer-profile-title">
-          <div className={styles.modalHeader}><div><span className={styles.eyebrow}>CUSTOMER PROFILE</span><h2 id="customer-profile-title">Customer details</h2><p>Illustrative account and loyalty information.</p></div><button type="button" className={styles.iconButton} onClick={() => setSelectedCustomerId(null)} aria-label="Close customer profile"><X size={19} /></button></div>
+          <div className={styles.modalHeader}><div><span className={styles.eyebrow}>CUSTOMER PROFILE</span><h2 id="customer-profile-title">Customer details</h2><p>Account and loyalty information.</p></div><button type="button" className={styles.iconButton} onClick={() => setSelectedCustomerId(null)} aria-label="Close customer profile"><X size={19} /></button></div>
           <div className={styles.profileHero}><span className={styles.profileAvatar}>{initials(selectedCustomer.name)}</span><div><h3>{selectedCustomer.name}</h3><span><Mail size={14} />{selectedCustomer.email}</span><span className={`${styles.tierBadge} ${tierClass(tierForPoints(selectedCustomer.points))}`}>{tierForPoints(selectedCustomer.points)} member</span></div></div>
           <div className={styles.profileStats}>
             <div><span>Total orders</span><strong>{selectedCustomer.orders}</strong></div>
@@ -495,13 +489,13 @@ export function BusinessCustomers({ email }: { email: string }) {
             <div><span>Favorite item</span><strong>{selectedCustomer.favoriteItem}</strong></div>
             <div><span>Member since</span><strong>{selectedCustomer.joined}</strong></div>
           </div>
-          <div className={styles.profileSectionHeading}><h3>Available rewards</h3><span>Points are only a local preview</span></div>
+          <div className={styles.profileSectionHeading}><h3>Available rewards</h3></div>
           <div className={styles.profileRewardList}>
             {activeRewards.map(reward => <div className={styles.profileReward} key={reward.id}><div><strong>{reward.name}</strong><span>{formatPoints(reward.pointsRequired)} points</span></div><button type="button" className={styles.smallSecondary} disabled={selectedCustomer.points < reward.pointsRequired || !hydrated} onClick={() => redeemReward(selectedCustomer, reward)}>{selectedCustomer.points < reward.pointsRequired ? "Not enough points" : "Redeem"}</button></div>)}
             {activeRewards.length === 0 && <p className={styles.mutedText}>There are no active rewards available.</p>}
           </div>
           <div className={styles.modalActions}><button type="button" className={styles.secondaryButton} onClick={() => setSelectedCustomerId(null)}>Close profile</button><button type="button" className={styles.primaryButton} onClick={() => openPointsDialog(selectedCustomer)} disabled={!hydrated}><Wallet size={16} /> Adjust points</button></div>
-          <p className={styles.modalFootnote}>Do not use this prototype to store or adjust real customer information. PostgreSQL access rules and merchant ownership checks are added in the backend phase.</p>
+          
         </section>
       </div>}
 
@@ -514,7 +508,7 @@ export function BusinessCustomers({ email }: { email: string }) {
             <label className={styles.field}>Reason<input value={pointsReason} onChange={event => setPointsReason(event.target.value)} maxLength={120} placeholder="e.g. Approved service recovery" required /></label>
             {pointsFormError && <div className={styles.formError} role="alert">{pointsFormError}</div>}
             <div className={styles.modalActions}><button type="button" className={styles.secondaryButton} onClick={() => setPointsCustomerId(null)}>Cancel</button><button type="submit" className={styles.primaryButton}><Check size={16} /> Save adjustment</button></div>
-            <p className={styles.modalFootnote}>Only changes this browser's sample customer balance. A real system should record a staff identity, reason, timestamp, and immutable points ledger.</p>
+            
           </form>
         </section>
       </div>}

@@ -6,7 +6,7 @@ import { BusinessDashboard } from "@/components/business/business-dashboard";
 
 export const metadata: Metadata = {
   title: "Business Dashboard | ScheduBrew",
-  description: "ScheduBrew business owner dashboard frontend preview",
+  description: "ScheduBrew business owner dashboard",
 };
 
 async function BusinessDashboardContent() {
@@ -15,7 +15,7 @@ async function BusinessDashboardContent() {
   if (error || !user) redirect("/auth/business");
 
   // AUTHENTICATION ONLY: Shop ownership / staff authorization is not yet implemented.
-  // This page contains sample data only. Do not add real merchant records here.
+  // Dashboard data will be connected to merchant records during backend integration.
   return <BusinessDashboard email={user.email ?? "Business owner"} />;
 }
 

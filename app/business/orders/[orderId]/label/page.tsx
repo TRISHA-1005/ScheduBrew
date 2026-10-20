@@ -4,7 +4,7 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { BusinessPickupLabel } from "@/components/business/business-pickup-label";
 
-export const metadata: Metadata = { title: "Test Pickup Label | ScheduBrew" };
+export const metadata: Metadata = { title: "Pickup Label | ScheduBrew" };
 
 async function LabelContent({ orderId }: { orderId: string }) {
   const supabase = await createClient();

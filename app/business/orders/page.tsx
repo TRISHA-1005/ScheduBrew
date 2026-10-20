@@ -6,7 +6,7 @@ import { BusinessOrders } from "@/components/business/business-orders";
 
 export const metadata: Metadata = {
   title: "Orders | ScheduBrew Owner Workspace",
-  description: "Business owner order management frontend preview",
+  description: "Manage customer orders and pickup statuses",
 };
 
 async function OrdersContent() {

@@ -6,7 +6,7 @@ import { BusinessMenu } from "@/components/business/business-menu";
 
 export const metadata: Metadata = {
   title: "Menu Management | ScheduBrew Owner Workspace",
-  description: "Menu items, prices, availability and stock frontend demonstration",
+  description: "Manage menu items, prices, availability and stock",
 };
 
 async function MenuContent() {

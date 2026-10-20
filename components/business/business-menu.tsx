@@ -7,7 +7,7 @@ import {
   BarChart3, CalendarClock, Check, ChevronDown, ClipboardList,
   Coffee, Download, Edit3, FileUp, Filter, LayoutDashboard, Menu,
   PackageOpen, Plus, RotateCcw, Search, Settings, ShieldCheck,
-  Trash2, UsersRound, X, Info, ArrowUpDown,
+  Trash2, UsersRound, X, ArrowUpDown,
 } from "lucide-react";
 import { Logout } from "@/components/schedu/logout";
 import { BusinessShopDetails } from "./business-shop-details";
@@ -133,7 +133,7 @@ export function BusinessMenu({ email }: { email: string }) {
       return;
     }
     persist(menuItems.map(i => i.id === item.id ? { ...i, available: !i.available } : i),
-      `${item.name} ${item.available ? "hidden from the example menu" : "marked available"}.`);
+      `${item.name} ${item.available ? "hidden from the menu" : "marked available"}.`);
   }
   function toggleBestseller(item: MenuItem) {
     persist(menuItems.map(i => i.id === item.id ? { ...i, bestseller: !i.bestseller } : i),
@@ -163,22 +163,22 @@ export function BusinessMenu({ email }: { email: string }) {
     if (menuItems.some(item => item.id !== dialogId && item.name.trim().toLowerCase() === name.toLowerCase())) {
       setFormError("An item with this name already exists."); return;
     }
-    if (dialogId === "create" && menuItems.length >= 150) { setFormError("Maximum of 150 menu items for this local prototype."); return; }
+    if (dialogId === "create" && menuItems.length >= 150) { setFormError("Maximum of 150 menu items."); return; }
     const item: MenuItem = { ...form, name, description: form.description.trim(),
       id: dialogId === "create" ? `MENU-${Date.now()}-${Math.random().toString(36).slice(2, 7)}` : dialogId };
     const next = dialogId === "create" ? [...menuItems, item] : menuItems.map(v => v.id === dialogId ? item : v);
-    if (persist(next, dialogId === "create" ? `${name} added to the test menu.` : `${name} updated.`)) {
+    if (persist(next, dialogId === "create" ? `${name} added to the menu.` : `${name} updated.`)) {
       setDialogId(null);
       setFormError("");
     }
   }
   function removeItem(item: MenuItem) {
-    if (!window.confirm(`Remove "${item.name}" from this browser's demo menu? This does not remove any existing test order records.`)) return;
+    if (!window.confirm(`Remove "${item.name}" from the menu? Existing orders will remain unchanged.`)) return;
     persist(menuItems.filter(v => v.id !== item.id), `${item.name} removed from the local menu.`);
   }
   function resetMenu() {
-    if (!window.confirm("Reset the entire owner menu to its original 12 example items? This removes all your locally added or edited menu items.")) return;
-    persist(STARTER_MENU.map(i => ({ ...i })), "Restored the original 12 sample menu items.");
+    if (!window.confirm("Reset the menu to its default items? This removes all added or edited menu items.")) return;
+    persist(STARTER_MENU.map(i => ({ ...i })), "Restored the default menu items.");
     setSearch(""); setStatus("all"); setCategory("All"); setPage(1);
   }
   function downloadCSV() {
@@ -186,7 +186,7 @@ export function BusinessMenu({ email }: { email: string }) {
     const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
-    a.href = url; a.download = "schedu-brew-menu-test.csv";
+    a.href = url; a.download = "schedubrew-menu.csv";
     document.body.appendChild(a); a.click(); a.remove();
     window.setTimeout(() => URL.revokeObjectURL(url), 2500);
     setNotice("Exported a CSV copy of the current browser menu.");
@@ -201,7 +201,7 @@ export function BusinessMenu({ email }: { email: string }) {
     try {
       const raw = await file.text();
       const next = importMenuCSV(raw, menuItems);
-      if (!window.confirm(`Import ${Math.max(0, next.length - menuItems.length)} new item(s) and update existing products with matching names? This updates this browser only.`)) return;
+      if (!window.confirm(`Import ${Math.max(0, next.length - menuItems.length)} new item(s) and update existing products with matching names? Continue with these changes?`)) return;
       if (persist(next, `Imported CSV successfully. Menu now has ${next.length} items.`)) setPage(1);
     } catch (error) {
       setNotice(error instanceof Error ? error.message : "The CSV file could not be imported.");
@@ -220,14 +220,13 @@ export function BusinessMenu({ email }: { email: string }) {
         <button type="button" className={shell.closeSide} aria-label="Close navigation" onClick={() => setMenuOpen(false)}><X size={20}/></button>
       </div>
       <nav className={shell.sideNavigation} aria-label="Business modules">
-        {nav.map(({ name, icon: Icon, href, batch }) => href ?
+        {nav.map(({ name, icon: Icon, href, batch }) => (
           <Link key={name} href={href} aria-current={batch === 4 ? "page" : undefined} className={`${shell.sideItem} ${batch === 4 ? shell.sideActive : ""}`} onClick={() => setMenuOpen(false)}><Icon size={18}/><span>{name}</span></Link>
-          : <button key={name} type="button" className={shell.sideItem} onClick={() => { setMenuOpen(false); setNotice(`${name} will be available in Business Batch ${batch}.`); }}><Icon size={18}/><span>{name}</span><small>Later</small></button>)}
+        ))}
       </nav>
       <div className={shell.sideFoot}>
         <div className={shell.sideFootTitle}><ShieldCheck size={17}/> Menu and availability</div>
         <p>Update products, prices, stock and preparation estimates before the next rush.</p>
-        <span>Frontend workspace · Batch 4</span>
       </div>
     </aside>
 
@@ -239,7 +238,6 @@ export function BusinessMenu({ email }: { email: string }) {
         </div>
         <div className={shell.topRight}>
           <span className={shell.datePill}><CalendarClock size={14}/>{new Intl.DateTimeFormat("en-PH", { year: "numeric", month: "short", day: "numeric", timeZone: "Asia/Manila" }).format(new Date())}</span>
-          <span className={shell.demoTopBadge}><span/> Test mode</span>
           <div className={shell.avatar} title={email}>{initials(email)}</div>
           <Logout />
         </div>
@@ -254,7 +252,7 @@ export function BusinessMenu({ email }: { email: string }) {
             <button className={styles.primaryBtn} type="button" disabled={!hydrated} onClick={beginAdd}><Plus size={17}/> Add menu item</button>
           </div>
         </div>
-        <div className={styles.modeNote}><Info size={17}/><span>Menu changes are saved only in this browser. This is not yet a live merchant catalog, and customer shop menus are not automatically updated.</span></div>
+        
         {notice && <div className={styles.notice} role="status"><span>{notice}</span><button type="button" aria-label="Dismiss message" onClick={() => setNotice("")}><X size={15}/></button></div>}
 
         <div className={styles.quickStats}>
@@ -298,7 +296,7 @@ export function BusinessMenu({ email }: { email: string }) {
             <span>{hydrated ? `Showing ${filtered.length ? (currentPage-1)*pageSize+1 : 0} to ${Math.min(currentPage*pageSize,filtered.length)} of ${filtered.length} items` : "Loading items"}</span>
             <div className={styles.footerActions}>
               <button type="button" onClick={downloadCSV} disabled={!hydrated}><Download size={15}/> Export CSV</button>
-              <button type="button" onClick={resetMenu} disabled={!hydrated}><RotateCcw size={15}/> Reset test menu</button>
+              <button type="button" onClick={resetMenu} disabled={!hydrated}><RotateCcw size={15}/> Reset menu</button>
               <div className={styles.pages}><button type="button" onClick={() => setPage(p => Math.max(1,p-1))} disabled={currentPage <= 1} aria-label="Previous page">‹</button><span>{currentPage} / {pageCount}</span><button type="button" onClick={() => setPage(p => Math.min(pageCount,p+1))} disabled={currentPage >= pageCount} aria-label="Next page">›</button></div>
             </div>
           </div>
@@ -316,8 +314,8 @@ export function BusinessMenu({ email }: { email: string }) {
             <label>Price (PHP) *<input type="number" step="0.01" min="0.01" max="100000" value={form.price} onChange={e => setForm(p => ({ ...p, price: Number(e.target.value) }))} required /></label>
             <label>Stock quantity *<input type="number" step="1" min="0" max="9999" value={form.stock} onChange={e => setForm(p => ({ ...p, stock: Number(e.target.value) }))} required /></label>
             <label>Prep time (minutes) *<input type="number" step="1" min="1" max="240" value={form.prepMinutes} onChange={e => setForm(p => ({ ...p, prepMinutes: Number(e.target.value) }))} required /></label>
-            <label className={styles.fullField}>Product image (from demo image library)<select value={form.image} onChange={e => setForm(p => ({ ...p, image: e.target.value }))}>{IMAGE_CHOICES.map(choice => <option key={choice.path} value={choice.path}>{choice.label}</option>)}</select></label>
-            <div className={styles.imagePreview}><Image src={form.image} width={80} height={65} alt="Selected product preview" unoptimized/><span>Images are selected from your existing ScheduBrew reference assets. Image uploads will be added with database storage later.</span></div>
+            <label className={styles.fullField}>Product image<select value={form.image} onChange={e => setForm(p => ({ ...p, image: e.target.value }))}>{IMAGE_CHOICES.map(choice => <option key={choice.path} value={choice.path}>{choice.label}</option>)}</select></label>
+            <div className={styles.imagePreview}><Image src={form.image} width={80} height={65} alt="Selected product preview" unoptimized/></div>
             <label className={styles.fullField}>Description<textarea rows={3} maxLength={300} placeholder="Describe the product" value={form.description} onChange={e => setForm(p => ({ ...p, description: e.target.value }))}/></label>
             <label className={styles.checkLine}><input type="checkbox" checked={form.available} onChange={e => setForm(p => ({ ...p, available: e.target.checked }))}/>Available on menu</label>
             <label className={styles.checkLine}><input type="checkbox" checked={form.bestseller} onChange={e => setForm(p => ({ ...p, bestseller: e.target.checked }))}/>Mark as bestseller</label>

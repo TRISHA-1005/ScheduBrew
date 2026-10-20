@@ -21,5 +21,5 @@ export function BusinessShopDetails() {
   }, []);
 
   const details = [profile.branchName, profile.city].filter(Boolean).join(" · ");
-  return <div><strong>{profile.businessName || "ScheduBrew Business"}</strong><span>{details || "Business profile"} · Demo shop</span></div>;
+  return <div><strong>{profile.businessName || "ScheduBrew Business"}</strong><span>{details || "Business profile"}</span></div>;
 }

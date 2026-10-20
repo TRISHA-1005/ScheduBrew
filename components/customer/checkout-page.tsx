@@ -16,7 +16,7 @@ const methods: { id: Payment; title: string; description: string }[] = [
   { id: "gcash", title: "GCash", description: "Preview only" },
   { id: "maya", title: "Maya", description: "Preview only" },
   { id: "card", title: "Card", description: "Preview only" },
-  { id: "counter", title: "Pay at counter", description: "Available in test mode" },
+  { id: "counter", title: "Pay at counter", description: "Pay when you arrive" },
 ];
 
 export function CheckoutPage({ email }: { email: string }) {
@@ -59,7 +59,7 @@ export function CheckoutPage({ email }: { email: string }) {
     if (!dates.some(d => d.key === date) || !pickupTime || !demoSlots(date).includes(pickupTime)) {
       setError("Select a pickup date and an available future time option."); return;
     }
-    if (payment !== "counter") { setError("Online payments are not connected. Choose Pay at counter to continue in test mode."); return; }
+    if (payment !== "counter") { setError("Online payments are not connected. Choose Pay at counter to continue."); return; }
     if (note.length > 400) { setError("Pickup notes must be 400 characters or fewer."); return; }
 
     setSubmitting(true);
@@ -101,7 +101,7 @@ export function CheckoutPage({ email }: { email: string }) {
                 </div>
                 <div className={c.field}><label>Available pickup times</label></div>
                 {slots.length ? <div className={c.slotGrid}>{slots.slice(0, 15).map(slot => <button key={slot} type="button" className={`${c.slot} ${pickupTime === slot ? c.slotSelected : ""}`} aria-pressed={pickupTime === slot} onClick={() => { setPickupTime(slot); setError(""); }}>{formatSlot(slot)}</button>)}</div> : <div className={c.slotEmpty}>No pickup times remain today. Choose another date.</div>}
-                <p className={c.help}>Test mode: Time options are not live reservations. No pickup slot is booked.</p>
+                
                 {pickupTime && <p className={c.help}><strong>Selected:</strong> {date} at {formatSlot(pickupTime)}</p>}
               </section>
               <section className={c.card}>
@@ -127,11 +127,11 @@ export function CheckoutPage({ email }: { email: string }) {
                 {lines.map(p => <div className={c.summaryItem} key={p.id}><Image src={p.image} alt="" width={44} height={44}/><div><b>{p.name}</b><small>Quantity: {p.quantity}</small></div><strong>{peso(p.quantity * p.price)}</strong></div>)}
                 <div className={c.rule}/>
                 <div className={c.summaryLine}><span>Subtotal</span><strong>{peso(subtotal)}</strong></div>
-                <div className={c.summaryLine}><span>Illustrative service fee</span><strong>{peso(SAMPLE_SERVICE_FEE)}</strong></div>
+                <div className={c.summaryLine}><span>Service fee</span><strong>{peso(SAMPLE_SERVICE_FEE)}</strong></div>
                 <div className={c.summaryTotal}><span>Total</span><strong>{peso(total)}</strong></div>
                 {error && <p className={c.error} role="alert">{error}</p>}
                 <button type="submit" disabled={submitting} className={c.primaryButton}>{submitting ? "Saving order…" : "Confirm Order"}</button>
-                <p className={c.muted}>Test mode: Confirm Order saves a local record only. It does not notify a shop, reserve a real slot, or collect payment.</p>
+                
                 <p className={c.muted}>Please do not use real private contact details while testing with shared devices.</p>
               </section>
               <div className={`${c.benefits} ${c.checkoutBenefits}`}>

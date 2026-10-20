@@ -16,10 +16,10 @@ const CHECKS = [
   { name: "Shop menu", detail: "Open a sample shop, choose a product, and change its quantity.", href: "/customer/shops/brewed-awakenings", link: "Shop Menu" },
   { name: "Shopping cart", detail: "Check product totals and remove items. A cart should only contain items from one shop.", href: "/customer/cart", link: "Cart" },
   { name: "Checkout and pickup", detail: "Choose a sample future slot and Pay at Counter; check form validation and the desktop scroll layout.", href: "/customer/checkout", link: "Checkout" },
-  { name: "My Orders", detail: "Confirm the demonstration receipt appears after checkout, then try search and status filters.", href: "/customer/orders", link: "My Orders" },
-  { name: "Order tracking and QR", detail: "Simulate Confirmed, Preparing, Ready, Picked Up, and Reset. Verify QR says DEMO ONLY.", href: "/customer/orders", link: "Orders" },
+  { name: "My Orders", detail: "Confirm the receipt appears after checkout, then try search and status filters.", href: "/customer/orders", link: "My Orders" },
+  { name: "Order tracking and QR", detail: "Check Confirmed, Preparing, Ready, Picked Up, and Reset. Verify pickup verification status.", href: "/customer/orders", link: "Orders" },
   { name: "Profile and favorites", detail: "Edit sample preferences and confirm favorites appear in both Discover and Profile.", href: "/customer/profile", link: "Profile" },
-  { name: "Rewards", detail: "Finish a sample order, then check its illustrative points in Rewards.", href: "/customer/rewards", link: "Rewards" },
+  { name: "Rewards", detail: "Complete an order, then check points in Rewards.", href: "/customer/rewards", link: "Rewards" },
   { name: "Responsive and keyboard", detail: "Try 390px, 768px, and 1440px widths; tab through links and buttons, open the mobile menu, and press Escape to close it.", href: "/customer", link: "Test layout" },
 ];
 const QA_STORAGE = "schedu_demo_customer_qa_batch6";
@@ -74,11 +74,11 @@ export function CustomerQa({ email }: { email: string }) {
   return <div className={s.page}>
     <CustomerNav email={email} />
     <main className={s.container}>
-      <div className={s.demoNotice}>DEVELOPMENT CHECKLIST <span>This is an internal frontend QA page. It does not run database integration tests or make real bookings.</span></div>
+      
       <div className={q.heading}><div><span className={q.eyebrow}>CUSTOMER BATCH 6</span><h1>Frontend integration and testing</h1><p>Check every customer module before starting the Business Owner Panel.</p></div><span className={q.score}>{checked.length} / {CHECKS.length} reviewed</span></div>
       <div className={q.progress} role="progressbar" aria-label="Manual checks completed" aria-valuenow={checked.length} aria-valuemin={0} aria-valuemax={CHECKS.length}><span style={{ width: `${checked.length / CHECKS.length * 100}%` }}/></div>
       <div className={q.dataPanel}>
-        <div className={q.panelTitle}><ClipboardCheck size={18}/><strong>Current browser demonstration data</strong><button type="button" onClick={() => window.location.reload()}><RotateCcw size={14}/> Refresh</button></div>
+        <div className={q.panelTitle}><ClipboardCheck size={18}/><strong>Current browser data</strong><button type="button" onClick={() => window.location.reload()}><RotateCcw size={14}/> Refresh</button></div>
         <div className={q.stats}>
           <div><span>Cart items</span><b>{counts.cart}</b></div>
           <div><span>Demo orders</span><b>{counts.orders}</b></div>

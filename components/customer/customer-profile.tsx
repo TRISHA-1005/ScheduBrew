@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { ArrowRight, Bell, CalendarClock, ChevronRight, ClipboardList, Coffee, Gift, Heart, MapPin, Pencil, Save, ShieldCheck, ShoppingBag, X } from "lucide-react";
+import { ArrowRight, Bell, CalendarClock, ChevronRight, ClipboardList, Gift, Heart, MapPin, Pencil, Save, ShieldCheck, ShoppingBag, X } from "lucide-react";
 import { peso, shops } from "@/data/schedu-mock";
 import { CustomerNav } from "./customer-nav";
 import { readOrders, type DemoOrder } from "./demo-order-data";
@@ -66,7 +66,7 @@ export function CustomerProfile({ email }: { email: string }) {
     if (!savePreferences(email, cleaned)) return setFeedback("Unable to save. Check browser storage permissions.");
     setPreferences(cleaned);
     setEditing(false);
-    setFeedback("Your profile preferences have been saved on this device.");
+    setFeedback("Your profile preferences have been saved.");
   }
 
   function onFavorite(shopId: string) {
@@ -112,14 +112,14 @@ export function CustomerProfile({ email }: { email: string }) {
               <label className={p.checkLine}><input disabled={!editing} type="checkbox" checked={editing ? draft.promoAlerts : preferences.promoAlerts} onChange={e => setDraft({ ...draft, promoAlerts: e.target.checked })}/> Promotions (preference only)</label>
               {editing && <div className={p.editActions}><button type="button" className={p.solidButton} onClick={save}><Save size={15}/> Save changes</button><button type="button" className={p.outlineButton} onClick={() => { setEditing(false); setDraft(preferences); }}><X size={15}/> Cancel</button></div>}
             </div>
-            <p className={p.finePrint}>These settings are not yet applied to checkout or connected to email and SMS notifications.</p>
+            
           </section>
         </div>
         <div className={p.mainColumn}>
           <div className={p.stats}>
             <div className={p.statCard}><small>Orders This Month</small><strong>{thisMonth}</strong><span><ShoppingBag size={14}/> Order history</span></div>
             <div className={p.statCard}><small>Completed Orders</small><strong>{rewards.completed}</strong><span><ClipboardList size={14}/> Completed pickups</span></div>
-            <div className={p.statCard}><small>Favorite Shops</small><strong>{favorites.length}</strong><span><Heart size={14}/> Saved on this device</span></div>
+            <div className={p.statCard}><small>Favorite Shops</small><strong>{favorites.length}</strong><span><Heart size={14}/> Saved shops</span></div>
           </div>
           <section className={p.card}>
             <div className={p.cardTitle}><h2><ShoppingBag size={18}/> Recent orders</h2><Link href="/customer/orders">View all <ArrowRight size={14}/></Link></div>
@@ -140,7 +140,7 @@ export function CustomerProfile({ email }: { email: string }) {
           </div>
         </div>
       </div>
-      <p className={p.bottomDisclaimer}><Coffee size={14}/> Test mode: Preferences, favorites, and order history are saved on this device. Real customer data and rewards will be connected securely later.</p>
+      
     </main>
   </div>;
 }

@@ -4,8 +4,8 @@ import { useEffect, useMemo, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, CheckCircle2, Clock3, Minus, Plus, ShoppingBag, Star, Trash2 } from "lucide-react";
-import { categories, products, peso, type CategoryId, type Product, type Shop } from "@/data/schedu-mock";
+import { ArrowLeft, Clock3, Minus, Plus, ShoppingBag, Star, Trash2 } from "lucide-react";
+import { categories, products, peso, type CategoryId, type Shop } from "@/data/schedu-mock";
 import { CustomerNav } from "./customer-nav";
 import s from "./customer.module.css";
 
@@ -46,7 +46,7 @@ export function ShopMenu({ shop, email }: {shop:Shop;email:string}) {
       const nextQty=Math.max(0,Math.min(30,previous+delta));
       const next=current.filter(x=>x.productId!==productId);
       if(nextQty>0) next.push({productId,quantity:nextQty});
-      // This is only a browser demo cart. It does not create a database order.
+      // Cart contents are saved locally until checkout is connected.
       return next;
     });
     setMessage('');
@@ -77,20 +77,20 @@ export function ShopMenu({ shop, email }: {shop:Shop;email:string}) {
             </article>
           })}</div>
           {filtered.length===0 && <p className={s.empty}>No items are available in this category.</p>}
-          <div className={s.infoStrip}><CheckCircle2 size={17}/> One shop per order. Pickup time availability will be confirmed when live booking is enabled.</div>
+          
         </div>
         <aside className={s.cartPanel} aria-label="Shopping cart">
           <div className={s.cartTitle}><h2>Your order</h2><span>{quantity} item{quantity!==1?'s':''}</span></div>
           {!loaded ? <p className={s.emptyCart}>Loading your cart...</p>:chosen.length===0?<div className={s.emptyCart}><ShoppingBag size={32}/><p>Your cart is empty.</p><span>Choose an item from the menu to start.</span></div>:<div className={s.cartItems}>{chosen.map(product=><div className={s.cartLine} key={product.id}>
             <Image src={product.image} alt="" width={55} height={55}/><div className={s.lineDetails}><b>{product.name}</b><strong>{peso(product.price*product.quantity)}</strong><div className={s.quantityButtons}><button type="button" aria-label={`Remove one ${product.name}`} onClick={()=>updateQuantity(product.id,-1)}><Minus size={14}/></button><span>{product.quantity}</span><button type="button" aria-label={`Add one ${product.name}`} onClick={()=>updateQuantity(product.id,1)}><Plus size={14}/></button></div></div>
           </div>)}</div>}
-          <div className={s.pickupBox}><h3>Pickup schedule</h3><label htmlFor="pickupDay">Pickup day</label><select id="pickupDay" value={pickupDay} onChange={e=>setPickupDay(e.target.value)}><option value="today">Today</option><option value="tomorrow">Tomorrow</option></select><label htmlFor="pickupTime">Preferred window</label><select id="pickupTime" value={pickupTime} onChange={e=>setPickupTime(e.target.value)}><option value="15:20">3:20 PM to 3:35 PM</option><option value="15:40">3:40 PM to 3:55 PM</option><option value="16:00">4:00 PM to 4:15 PM</option></select><small>These windows are examples only. No live booking is created.</small></div>
+          <div className={s.pickupBox}><h3>Pickup schedule</h3><label htmlFor="pickupDay">Pickup day</label><select id="pickupDay" value={pickupDay} onChange={e=>setPickupDay(e.target.value)}><option value="today">Today</option><option value="tomorrow">Tomorrow</option></select><label htmlFor="pickupTime">Preferred window</label><select id="pickupTime" value={pickupTime} onChange={e=>setPickupTime(e.target.value)}><option value="15:20">3:20 PM to 3:35 PM</option><option value="15:40">3:40 PM to 3:55 PM</option><option value="16:00">4:00 PM to 4:15 PM</option></select></div>
           <div className={s.cartSummary}><span>Subtotal</span><strong>{peso(total)}</strong></div>
           <button type="button" className={s.checkoutButton} disabled={quantity===0} onClick={()=>router.push("/customer/checkout")}>Continue to checkout</button>
           {quantity>0 && <Link href="/customer/cart" className={s.backLink} style={{justifyContent:"center",marginTop:12}}>View full cart</Link>}
           {message && <p className={s.cartMessage} role="status">{message}</p>}
           {quantity>0 && <button type="button" onClick={clearCart} className={s.clearButton}><Trash2 size={14}/> Clear cart</button>}
-          <p className={s.cartFinePrint}>Test mode: Pickup times are examples, not live shop availability.</p>
+          
         </aside>
       </div>
     </main>

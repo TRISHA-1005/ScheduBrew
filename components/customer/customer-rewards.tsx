@@ -100,11 +100,11 @@ export function CustomerRewards({ email }: { email: string }) {
           <p className={p.eyebrow}>REWARD DETAILS</p><h2 id="reward-title">{selectedReward.title}</h2><p>{selectedReward.description}</p>
           <div className={p.modalSummary}><span>Required points</span><b>{selectedReward.points} points</b></div>
           <div className={p.modalSummary}><span>Available Points</span><b>{rewards.points} points</b></div>
-          <p className={p.muted}>Redemption is unavailable in test mode. Rewards are not yet connected to participating shops.</p>
+          <p className={p.muted}>Earn points as you complete eligible orders.</p>
           <button type="button" className={p.solidButton} onClick={()=>setSelected(null)}>Got it</button>
         </section>
       </div>}
-      <p className={p.bottomDisclaimer}><Sparkles size={14}/> Test mode: Points and rewards are calculated from orders stored in this browser. No rewards can be redeemed yet.</p>
+      
     </main>
   </div>;
 }

@@ -6,7 +6,7 @@ import { BusinessPickupSchedule } from "@/components/business/business-pickup-sc
 
 export const metadata: Metadata = {
   title: "Pickup Schedule | ScheduBrew Owner Workspace",
-  description: "Pickup scheduling and capacity planning frontend demonstration",
+  description: "Manage pickup scheduling and capacity",
 };
 
 async function PickupScheduleContent() {

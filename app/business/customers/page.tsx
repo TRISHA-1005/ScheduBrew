@@ -6,14 +6,14 @@ import { BusinessCustomers } from "@/components/business/business-customers";
 
 export const metadata: Metadata = {
   title: "Customers and Loyalty | ScheduBrew Owner Workspace",
-  description: "Customer directory and loyalty reward frontend prototype",
+  description: "Manage customer profiles and loyalty rewards",
 };
 
 async function CustomersContent() {
   const supabase = await createClient();
   const { data: { user }, error } = await supabase.auth.getUser();
   if (error || !user) redirect("/auth/business");
-  // Authentication is enforced. Merchant and branch ownership checks are added with the database phase.
+  // Authentication is enforced. Merchant and branch ownership checks are part of backend integration.
   return <BusinessCustomers email={user.email ?? "Business owner"} />;
 }
 

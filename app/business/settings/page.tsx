@@ -6,7 +6,7 @@ import { BusinessSettings } from "@/components/business/business-settings";
 
 export const metadata: Metadata = {
   title: "Business Settings | ScheduBrew Owner Workspace",
-  description: "Manage business details, operating hours, notification preferences and demo subscription plans",
+  description: "Manage business details, operating hours, notification preferences and subscription plans",
 };
 
 async function SettingsContent() {

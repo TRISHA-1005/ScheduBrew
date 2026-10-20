@@ -87,7 +87,7 @@ export function CustomerOrders({ email }: { email: string }) {
               <div className={t.orderBottom}><div className={t.pickupText}><CalendarDays size={16}/> Pickup: {formattedPickupDate(order.pickupDate)} at {formatSlot(order.pickupTime)}</div><Link className={t.outlinedLink} href={`/customer/orders/${encodeURIComponent(order.id)}`}>Track Order <ArrowRight size={15}/></Link></div>
             </article>;
           })}</div>}
-          <div className={t.clearRow}><span>Test mode: orders are saved only in this browser and are not sent to shops.</span><button type="button" className={t.clearButton} onClick={clearHistory}><Trash2 size={14}/> Clear order history</button></div>
+          <div className={t.clearRow}><button type="button" className={t.clearButton} onClick={clearHistory}><Trash2 size={14}/> Clear order history</button></div>
         </>}
     </main>
   </div>;

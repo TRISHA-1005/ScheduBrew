@@ -94,7 +94,7 @@ export function CustomerDiscover({email, initialCategory}:{email:string;initialC
         <section id="rewards"><b><Link href="/customer/rewards">Rewards →</Link></b><p>See your points, rewards, and completed orders.</p></section>
         <section id="profile"><b><Link href="/customer/profile">Profile →</Link></b><p>Manage pickup preferences and favorite shops.</p></section>
       </div>
-      <footer className={s.footer}>ScheduBrew by The Ready Counter · Test mode: listings and preparation times are illustrative.</footer>
+      <footer className={s.footer}>ScheduBrew by The Ready Counter</footer>
     </main>
   </div>;
 }

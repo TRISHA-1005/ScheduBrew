@@ -50,7 +50,7 @@ export function CartPage({ email }: { email: string }) {
           <div className={c.rule}/>
           <div className={c.summaryTotal}><span>Subtotal</span><strong>{peso(subtotal)}</strong></div>
           <Link href="/customer/checkout" className={c.primaryButton}>Continue to checkout →</Link>
-          <p className={c.muted}>Your cart is saved on this device. Pickup details are reviewed at checkout.</p>
+          
         </aside>
       </div>}
     </main>
